@@ -4,25 +4,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Time;
 import java.util.List;
 
-@Entity(name = "buses")
+@Entity(name = "routes")
 @Data
-public class Bus {
+public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column
-    private String busnumber;
+    private String from;
     @Column
-    private int seatcount;
+    private String to;
     @Column
-    private String bustype;
-    @ManyToOne
-    @JoinColumn(name= "driver")
-    private Driver driver;
-    @OneToMany(mappedBy = "bus")
+    private int distance;
+    @Column
+    private Time duration;
+    @OneToMany(mappedBy = "route")
     @JsonIgnore
     private List<Schedule> schedules;
-
 }

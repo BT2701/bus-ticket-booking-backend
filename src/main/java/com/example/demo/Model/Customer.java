@@ -6,23 +6,21 @@ import lombok.Data;
 
 import java.util.List;
 
-@Entity(name = "buses")
+@Entity(name = "customers")
 @Data
-public class Bus {
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column
-    private String busnumber;
+    private String name;
     @Column
-    private int seatcount;
+    private String address;
     @Column
-    private String bustype;
-    @ManyToOne
-    @JoinColumn(name= "driver")
-    private Driver driver;
-    @OneToMany(mappedBy = "bus")
+    private String phone;
+    @Column
+    private String email;
+    @OneToMany(mappedBy = "customer")
     @JsonIgnore
-    private List<Schedule> schedules;
-
+    private List<Booking> bookings;
 }
