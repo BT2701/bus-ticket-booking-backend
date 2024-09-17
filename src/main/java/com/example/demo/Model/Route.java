@@ -13,9 +13,11 @@ public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
+
+    @Column(name = "`from`")
     private String from;
-    @Column
+
+    @Column(name = "`to`")
     private String to;
     @Column
     private int distance;
