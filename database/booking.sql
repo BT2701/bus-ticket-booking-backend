@@ -45,14 +45,15 @@ CREATE TABLE IF NOT EXISTS `buses` (
   `seatcount` int(11) NOT NULL,
   `bustype` varchar(50) NOT NULL DEFAULT '',
   `driver` int(11) NOT NULL,
+  `img` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_buses_drivers` (`driver`) USING BTREE,
   CONSTRAINT `FK_buses_drivers` FOREIGN KEY (`driver`) REFERENCES `drivers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table booking.buses: ~1 rows (approximately)
-INSERT INTO `buses` (`id`, `busnumber`, `seatcount`, `bustype`, `driver`) VALUES
-	(2, '78E177777', 26, 'Vip', 1);
+-- Dumping data for table booking.buses: ~0 rows (approximately)
+INSERT INTO `buses` (`id`, `busnumber`, `seatcount`, `bustype`, `driver`, `img`) VALUES
+	(2, '78E177777', 26, 'Vip', 1, NULL);
 
 -- Dumping structure for table booking.customers
 CREATE TABLE IF NOT EXISTS `customers` (
