@@ -14,4 +14,7 @@ public class BusSV {
     public List<Bus> getBuses() {
         return busRepo.findAll();
     }
+    public Bus getBus(int id) {
+        return busRepo.findById(id).get();
+    }
 }
