@@ -22,7 +22,6 @@ import java.util.List;
 import static org.springframework.http.HttpMethod.*;
 
 @Configuration
-//@EnableMethodSecurity
 @EnableWebSecurity
 @EnableWebMvc
 @RequiredArgsConstructor
