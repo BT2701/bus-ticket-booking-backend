@@ -14,16 +14,19 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "`from`")
-    private String from;
-
-    @Column(name = "`to`")
-    private String to;
-    @Column
     private int distance;
     @Column
     private Time duration;
     @OneToMany(mappedBy = "route")
     @JsonIgnore
     private List<Schedule> schedules;
+
+    @ManyToOne
+    @JoinColumn(name = "from")
+    private Station from;
+
+    @ManyToOne
+    @JoinColumn(name = "to")
+    private Station to;
+
 }

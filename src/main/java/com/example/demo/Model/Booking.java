@@ -13,7 +13,7 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column
-    private int seatnum;
+    private String seatnum;
     @Column
     private Timestamp time;
     @Column

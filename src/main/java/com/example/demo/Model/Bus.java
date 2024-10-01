@@ -17,8 +17,6 @@ public class Bus {
     @Column
     private int seatcount;
     @Column
-    private String bustype;
-    @Column
     private String img;
     @ManyToOne
     @JoinColumn(name= "driver")
@@ -26,5 +24,11 @@ public class Bus {
     @OneToMany(mappedBy = "bus")
     @JsonIgnore
     private List<Schedule> schedules;
+
+    @ManyToOne
+    @JoinColumn(name = "category")
+    private Category category;
+
+
 
 }
