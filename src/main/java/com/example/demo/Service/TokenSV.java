@@ -41,7 +41,7 @@ public class TokenSV implements ITokenService{
 
         Token newToken = Token.builder()
                 .customer(customer)
-                .token(token)
+                .accessToken(token)
                 .isAccessExpired(false)
                 .accessExpirationDate(expirationDateTime)
                 .build();
@@ -59,7 +59,7 @@ public class TokenSV implements ITokenService{
 
         String token = jwtUtils.generateToken(customer);
 
-        jwtToken.setToken(token);
+        jwtToken.setAccessToken(token);
         jwtToken.setAccessExpirationDate(LocalDateTime.now().plusSeconds(accessTokenExpire));
         jwtToken.setAccessExpired(false);
 
@@ -69,6 +69,4 @@ public class TokenSV implements ITokenService{
 
         return jwtToken;
     }
-
-
 }

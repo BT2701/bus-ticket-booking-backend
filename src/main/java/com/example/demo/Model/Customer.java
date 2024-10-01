@@ -46,6 +46,9 @@ public class Customer implements UserDetails {
     @JsonIgnore
     private List<Token> tokens;
 
+    @OneToOne(mappedBy = "customer")
+    private ForgotPassword forgotPassword;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));

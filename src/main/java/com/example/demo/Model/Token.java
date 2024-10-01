@@ -19,7 +19,7 @@ public class Token {
     private Long id;
 
     @Column(name="access_token", nullable = false, length = 255)
-    private String token;
+    private String accessToken;
 
     @Column(name="expiration_date")
     private LocalDateTime accessExpirationDate;

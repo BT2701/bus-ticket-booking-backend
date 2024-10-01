@@ -1,9 +1,12 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTO.CustomerDTO;
+import com.example.demo.DTO.ForgotPasswordDTO;
 import com.example.demo.Model.Customer;
+import com.example.demo.Model.ForgotPassword;
 import com.example.demo.Model.Token;
 import com.example.demo.Repository.CustomerRepo;
+import com.example.demo.Repository.ForgotPasswordRepo;
 import com.example.demo.Repository.TokenRepo;
 import com.example.demo.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
 import java.util.Optional;
@@ -21,7 +25,10 @@ import java.util.Optional;
 public class CustomerService implements ICustomerService{
     private final CustomerRepo customerRepo;
     private final JwtUtils jwtUtils;
+
     private final TokenRepo tokenRepo;
+    private final ForgotPasswordRepo forgotPasswordRepo;
+
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
@@ -47,6 +54,7 @@ public class CustomerService implements ICustomerService{
                 .password(customerDTO.getPassword())
                 .tokens(null)
                 .bookings(null)
+                .forgotPassword(null)
                 .build();
 
         String encodePassword = passwordEncoder.encode(customerDTO.getPassword());
@@ -57,24 +65,48 @@ public class CustomerService implements ICustomerService{
 
     @Override
     public String login(String emailOrPhone, String password) throws Exception {
-        Optional<Customer> customer;
+        try {
+            Optional<Customer> customer;
 
-        if (emailOrPhone.contains("@")) {
-            customer = customerRepo.findCustomerByEmail(emailOrPhone);
-        } else {
-            customer = customerRepo.findCustomerByPhone(emailOrPhone);
+            if (emailOrPhone.contains("@")) {
+                customer = customerRepo.findCustomerByEmail(emailOrPhone);
+            } else {
+                customer = customerRepo.findCustomerByPhone(emailOrPhone);
+            }
+            if(customer.isEmpty()) {
+                throw new Exception("Invalid phonenumber or email !");
+            }
+
+            Customer existingCustomer = customer.get();
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    existingCustomer.getPhone(), password, existingCustomer.getAuthorities()
+            );
+            authenticationManager.authenticate(authenticationToken);
+
+            return jwtUtils.generateToken(existingCustomer);
+        } catch (Exception e) {
+            throw new Exception("Invalid username or password AND the error is " + e.getMessage());
         }
-        if(customer.isEmpty()) {
-            throw new Exception("Invalid phonenumber or password !");
+    }
+
+    @Transactional
+    @Override
+    public String changePassword(String resetToken, Customer customer, String newPassword) throws Exception {
+        try {
+            if(newPassword != null && !newPassword.isEmpty()) {
+                String encodeNewPassword = passwordEncoder.encode(newPassword);
+                customer.setPassword(encodeNewPassword);
+            }
+
+            ForgotPassword forgotPassword = forgotPasswordRepo.findByResetTokenAndCustomer(resetToken, customer);
+            forgotPasswordRepo.delete(forgotPassword);
+
+            tokenRepo.deleteAllTokensByCustomer(customer);
+            customerRepo.save(customer);
+            return "Password was successfully changed!";
+        } catch (Exception e) {
+            throw new Exception("Could not change password with error : " + e.getMessage());
         }
-
-        Customer existingCustomer = customer.get();
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                existingCustomer.getPhone(), password, existingCustomer.getAuthorities()
-        );
-        authenticationManager.authenticate(authenticationToken);
-
-        return jwtUtils.generateToken(existingCustomer);
     }
 
     @Override
@@ -94,7 +126,7 @@ public class CustomerService implements ICustomerService{
     public Customer getCustomerDetailsFromRefreshToken(String refreshToken) throws Exception {
         Token token = tokenRepo.findByRefreshToken(refreshToken);
 
-        return getCustomerDetailsFromToken(token.getToken());
+        return getCustomerDetailsFromToken(token.getAccessToken());
     }
 
     @Override

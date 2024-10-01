@@ -1,9 +1,6 @@
 package com.example.demo.Controller;
 
-import com.example.demo.DTO.CustomerDTO;
-import com.example.demo.DTO.CustomerResponseDTO;
-import com.example.demo.DTO.LoginDTO;
-import com.example.demo.DTO.LoginResponseDTO;
+import com.example.demo.DTO.*;
 import com.example.demo.Model.Customer;
 import com.example.demo.Model.Token;
 import com.example.demo.Service.CustomerService;
@@ -20,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 @RequiredArgsConstructor
 public class CustomersCTL {
     private final CustomerService customerService;
@@ -47,7 +44,7 @@ public class CustomersCTL {
 
             return ResponseEntity.ok(customer);
         } catch (Exception e) {
-            throw new Exception("Error while registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error while registering user: " + e.getMessage());
         }
     }
 
@@ -71,12 +68,38 @@ public class CustomersCTL {
                     .message("Login successfully !")
                     .id(customerDetails.getId())
                     .username(customerDetails.getPhone())
-                    .token(jwtToken.getToken())
+                    .accessToken(jwtToken.getAccessToken())
                     .refreshToken(jwtToken.getRefreshToken())
                     .build()
             );
         } catch (Exception e) {
-            throw new Exception("Error while logging in: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error while logging in: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO, BindingResult result) {
+        try {
+            if(result.hasErrors()) {
+                List<String> errorMessages =  result.getFieldErrors()
+                        .stream()
+                        .map(FieldError::getDefaultMessage)
+                        .toList();
+
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
+            if(!forgotPasswordDTO.getPassword().equals(forgotPasswordDTO.getConfirmPassword())) {
+                return ResponseEntity.badRequest().body("Password and retype password do not match !");
+            }
+
+            String resetToken = forgotPasswordDTO.getResetToken();
+            Customer userDetails = customerService.getCustomerDetailsFromToken(resetToken);
+            String rs = customerService.changePassword(resetToken, userDetails, forgotPasswordDTO.getPassword());
+
+            return ResponseEntity.ok(rs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -88,7 +111,7 @@ public class CustomersCTL {
 
             return ResponseEntity.ok(LoginResponseDTO.builder()
                     .message("Refresh token successfully !")
-                    .token(jwtToken.getToken())
+                    .accessToken(jwtToken.getAccessToken())
                     .refreshToken(jwtToken.getRefreshToken())
                     .id(userDetails.getId())
                     .username(userDetails.getUsername())
