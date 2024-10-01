@@ -5,7 +5,6 @@ import com.example.demo.Model.Token;
 
 public interface ITokenService {
     Token addToken(Customer customer, String token);
-
     Token refreshToken(String refreshToken, Customer userDetails) throws Exception;
 }
 

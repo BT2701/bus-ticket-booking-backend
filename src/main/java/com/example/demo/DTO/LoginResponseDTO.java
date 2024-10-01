@@ -19,8 +19,8 @@ public class LoginResponseDTO {
     @JsonProperty("user_name")
     private String username;
 
-    @JsonProperty("token")
-    private String token;
+    @JsonProperty("access_token")
+    private String accessToken;
 
     @JsonProperty("refresh_token")
     private String refreshToken;

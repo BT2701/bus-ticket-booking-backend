@@ -27,6 +27,8 @@ public class JwtUtils {
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
+    @Value("${application.security.jwt.reset-token-validity}")
+    private Long resetTokenExpire;
     @Value("${application.security.jwt.token-validity}")
     private Long accessTokenExpire;
 
@@ -40,6 +42,24 @@ public class JwtUtils {
                     .setClaims(claims)
                     .setSubject(customer.getPhone())
                     .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpire * 1000L)) // chuyển từ s sang date
+                    .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                    .compact();
+
+            return token;
+        } catch (Exception e) {
+            throw  new Exception("Cannot create jwts token: " + e.getMessage());
+        }
+    }
+
+    public String generateResetToken(Customer customer) throws Exception {
+        Map<String, Object> claims = new HashMap<String, Object>();
+        claims.put("phoneNumber", customer.getPhone());
+
+        try {
+            String token = Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(customer.getPhone())
+                    .setExpiration(new Date(System.currentTimeMillis() + resetTokenExpire * 1000L)) // chuyển từ s sang date
                     .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                     .compact();
 
@@ -75,7 +95,7 @@ public class JwtUtils {
 
     public boolean validateToken(String token, UserDetails userDetails) {
         String phoneNumber = extractPhoneNumber(token);
-        Token exsistingToken = tokenRepo.findByToken(token);
+        Token exsistingToken = tokenRepo.findByAccessToken(token);
 
         if(exsistingToken == null) {
             return false;
