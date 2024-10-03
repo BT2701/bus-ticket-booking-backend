@@ -57,7 +57,7 @@ public class EmailService {
         String resetToken = forgotpasswordSV.createForgotPassword(customer.get());
 
         Context context = new Context();
-        String linkConfirm = String.format("http://localhost:3000/forgot-password?resetToken=%s", resetToken);
+        String linkConfirm = String.format("http://localhost:3000/reset-password?resetToken=%s", resetToken);
         Map<String, Object> properties = new HashMap<>();
         properties.put("linkConfirm", linkConfirm);
         context.setVariables(properties);

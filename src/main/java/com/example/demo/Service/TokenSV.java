@@ -27,46 +27,73 @@ public class TokenSV implements ITokenService{
     @Value("${application.security.jwt.refresh-token-validity}")
     private Long refreshTokenExpire;
 
+
+    @Override
+    public List<Token> getAllTokensByCustomer(Customer customer) {
+        try {
+            return tokenRepo.findByCustomer(customer);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public void deleteAllTokensByCustomer(Customer customer) {
+        try {
+            tokenRepo.deleteAllTokensByCustomer(customer);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+    }
+
     @Transactional
     @Override
     public Token addToken(Customer customer, String token) {
-        List<Token> userTokens = tokenRepo.findByCustomer(customer);
-        int tokenCount = userTokens.size();
+        try {
+            List<Token> userTokens = tokenRepo.findByCustomer(customer);
+            int tokenCount = userTokens.size();
 
-        if(tokenCount >= MAX_TOKENS) {
-            Token tokenToDelete = userTokens.get(0);
-            tokenRepo.delete(tokenToDelete);
+            if(tokenCount >= MAX_TOKENS) {
+                Token tokenToDelete = userTokens.get(0);
+                tokenRepo.delete(tokenToDelete);
+            }
+            LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(accessTokenExpire);
+
+            Token newToken = Token.builder()
+                    .customer(customer)
+                    .accessToken(token)
+                    .isAccessExpired(false)
+                    .accessExpirationDate(expirationDateTime)
+                    .build();
+
+            newToken.setRefreshToken(UUID.randomUUID().toString());
+            newToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpire));
+            tokenRepo.save(newToken);
+
+            return newToken;
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
-        LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(accessTokenExpire);
-
-        Token newToken = Token.builder()
-                .customer(customer)
-                .accessToken(token)
-                .isAccessExpired(false)
-                .accessExpirationDate(expirationDateTime)
-                .build();
-
-        newToken.setRefreshToken(UUID.randomUUID().toString());
-        newToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpire));
-        tokenRepo.save(newToken);
-
-        return newToken;
     }
 
     @Override
     public Token refreshToken(String refreshToken, Customer customer) throws Exception {
-        Token jwtToken = tokenRepo.findByRefreshToken(refreshToken);
+        try {
+            Token jwtToken = tokenRepo.findByRefreshToken(refreshToken);
 
-        String token = jwtUtils.generateToken(customer);
+            String token = jwtUtils.generateToken(customer);
 
-        jwtToken.setAccessToken(token);
-        jwtToken.setAccessExpirationDate(LocalDateTime.now().plusSeconds(accessTokenExpire));
-        jwtToken.setAccessExpired(false);
+            jwtToken.setAccessToken(token);
+            jwtToken.setAccessExpirationDate(LocalDateTime.now().plusSeconds(accessTokenExpire));
+            jwtToken.setAccessExpired(false);
 
-        jwtToken.setRefreshToken(UUID.randomUUID().toString());
-        jwtToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpire));
-        tokenRepo.save(jwtToken);
+            jwtToken.setRefreshToken(UUID.randomUUID().toString());
+            jwtToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpire));
+            tokenRepo.save(jwtToken);
 
-        return jwtToken;
+            return jwtToken;
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }
