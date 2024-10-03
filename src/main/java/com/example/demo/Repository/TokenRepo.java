@@ -11,11 +11,10 @@ import java.util.List;
 public interface TokenRepo extends JpaRepository<Token, Long> {
     Token findByAccessToken(String accessToken);
 
-//    Token findByRefreshTokenAndAccessToken(String refreshToken, String accessToken);
-
     Token findByRefreshToken(String refreshToken);
 
     List<Token> findByCustomer(Customer customer);
 
     void deleteAllTokensByCustomer(Customer customer);
+    void deleteTokenByAccessTokenAndCustomer(String accessToken, Customer customer);
 }
