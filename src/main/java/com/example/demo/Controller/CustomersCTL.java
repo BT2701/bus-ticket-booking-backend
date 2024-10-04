@@ -32,12 +32,24 @@ public class CustomersCTL {
                         .map(FieldError::getDefaultMessage)
                         .toList();
 
-                return ResponseEntity.badRequest().body(errorMessages);
+                return ResponseEntity.badRequest().body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .message(String.valueOf(errorMessages))
+                                .data(null)
+                                .build()
+                );
             }
 
 
             if(!customerDTO.getPassword().equals(customerDTO.getConfirmPassword())) {
-                return ResponseEntity.badRequest().body("Password does not match !");
+                return ResponseEntity.badRequest().body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .message("Password does not match !")
+                                .data(null)
+                                .build()
+                );
             }
 
             Customer customer = customerService.createCustomer(customerDTO);
@@ -50,7 +62,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -69,7 +81,7 @@ public class CustomersCTL {
                        .map(FieldError::getDefaultMessage)
                        .toList();
 
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
                                 .message(String.valueOf(errorMessages))
@@ -96,7 +108,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -115,7 +127,7 @@ public class CustomersCTL {
                         .map(FieldError::getDefaultMessage)
                         .toList();
 
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
                                 .message(String.valueOf(errorMessages))
@@ -125,7 +137,13 @@ public class CustomersCTL {
             }
 
             if(!forgotPasswordDTO.getPassword().equals(forgotPasswordDTO.getConfirmPassword())) {
-                return ResponseEntity.badRequest().body("Password and retype password do not match !");
+                return ResponseEntity.badRequest().body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .message("Password and retype password do not match !")
+                                .data(null)
+                                .build()
+                );
             }
 
             String resetToken = forgotPasswordDTO.getResetToken();
@@ -140,7 +158,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -169,7 +187,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message("Refresh token failed !")
@@ -188,7 +206,7 @@ public class CustomersCTL {
                         .map(FieldError::getDefaultMessage)
                         .toList();
 
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
                                 .message(String.valueOf(errorMessages))
@@ -200,7 +218,7 @@ public class CustomersCTL {
             String accessToken = token.substring(7);
 
             if (!updatePasswordDTO.getNewPassword().equals(updatePasswordDTO.getConfirmNewPassword())) {
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
                                 .message("New password and confirm password do not match!")
@@ -218,7 +236,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -240,7 +258,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -274,7 +292,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())
@@ -296,7 +314,7 @@ public class CustomersCTL {
                 List<String> errorMessages = result.getFieldErrors().stream()
                         .map(FieldError::getDefaultMessage)
                         .toList();
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
                                 .message(String.valueOf(errorMessages))
@@ -307,7 +325,7 @@ public class CustomersCTL {
             String extractedToken = authorization.substring(7);
             Customer user = customerService.getCustomerDetailsFromToken(extractedToken);
             if(user.getId() != userId) {
-                return ResponseEntity.ok(
+                return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.FORBIDDEN.value())
                                 .message("Invalid user!")
@@ -336,7 +354,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message(e.getMessage())

@@ -22,11 +22,11 @@ public class Route {
     private List<Schedule> schedules;
 
     @ManyToOne
-    @JoinColumn(name = "from")
+    @JoinColumn(name = "`from`")
     private Station from;
 
     @ManyToOne
-    @JoinColumn(name = "to")
+    @JoinColumn(name = "`to`")
     private Station to;
 
 }
