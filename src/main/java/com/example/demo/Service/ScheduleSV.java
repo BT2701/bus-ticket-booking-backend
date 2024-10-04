@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+    
 @Service
 public class ScheduleSV {
     @Autowired
@@ -20,5 +20,8 @@ public class ScheduleSV {
     }
     public List<Schedule> getByRoute(int routeid){
         return scheduleRepo.findByRoute(routeid);
+    }
+    public Schedule getScheduleById(int id){
+        return scheduleRepo.findById(id).orElse(null);
     }
 }

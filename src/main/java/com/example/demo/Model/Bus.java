@@ -15,8 +15,6 @@ public class Bus {
     @Column
     private String busnumber;
     @Column
-    private int seatcount;
-    @Column
     private String img;
     @ManyToOne
     @JoinColumn(name= "driver")
