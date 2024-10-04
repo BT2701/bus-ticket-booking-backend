@@ -33,7 +33,7 @@ public class EmailCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.ok(
+            return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
                             .message("Sending email was failure : " + e.getMessage())
