@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "${frontend.url}", allowCredentials = "true")
 public class CategoryCTL {
     @Autowired
     private CategorySV categorySV;
