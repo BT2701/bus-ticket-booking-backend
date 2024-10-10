@@ -26,6 +26,5 @@ public class Schedule {
     @JoinColumn(name = "route")
     private Route route;
     @OneToMany(mappedBy = "schedule")
-    @JsonIgnore
     private List<Booking> bookings;
 }

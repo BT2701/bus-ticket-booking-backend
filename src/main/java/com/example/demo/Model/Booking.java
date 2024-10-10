@@ -23,6 +23,7 @@ public class Booking {
     private Customer customer;
     @ManyToOne
     @JoinColumn(name = "schedule")
+    @JsonIgnore
     private Schedule schedule;
     @OneToOne(mappedBy = "booking")
     @JsonIgnore
