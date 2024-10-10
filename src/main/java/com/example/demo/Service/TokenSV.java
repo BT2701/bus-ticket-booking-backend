@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -81,6 +82,10 @@ public class TokenSV implements ITokenService{
         try {
             Token jwtToken = tokenRepo.findByRefreshToken(refreshToken);
 
+            if(jwtToken.getRefreshExpirationDate().isBefore(LocalDateTime.now())) {
+                throw new DateTimeException("Refresh token đã hết hạn !");
+            }
+
             String token = jwtUtils.generateToken(customer);
 
             jwtToken.setAccessToken(token);
@@ -93,7 +98,7 @@ public class TokenSV implements ITokenService{
 
             return jwtToken;
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new Exception("Làm mới token thất bại !");
         }
     }
 }

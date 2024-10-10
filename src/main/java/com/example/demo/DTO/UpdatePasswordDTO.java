@@ -10,12 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdatePasswordDTO {
-    @NotBlank(message = "Old password is required!")
+    @NotBlank(message = "Mật khẩu cũ không được bỏ trống !")
     private String oldPassword;
 
-    @NotBlank(message = "New password is required!")
+    @NotBlank(message = "Mật khẩu mới không được bỏ trống !")
     private String newPassword;
 
-    @NotBlank(message = "Confirm new password is required!")
+    @NotBlank(message = "Xác nhận mật khẩu mới không được bỏ trống !")
     private String confirmNewPassword;
 }

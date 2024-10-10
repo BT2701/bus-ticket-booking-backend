@@ -14,19 +14,19 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateCustomerDTO {
-    @NotBlank(message = "Name is required!")
+    @NotBlank(message = "Tên không được bỏ trống !")
     private String name;
 
-    @NotBlank(message = "Address is required!")
+    @NotBlank(message = "Địa chỉ không được bỏ trống !")
     private String address;
 
-    @NotBlank(message = "Phone is required!")
+    @NotBlank(message = "Số điện thoại không được bỏ trống !")
     @Size(min = 10, max = 10, message = "Phone number must be 10 characters")
     private String phone;
 
-    @NotNull(message = "Date of birth is required!")
+    @NotNull(message = "Ngày sinh không được bỏ trống !")
     private Date birth;
 
-    @NotBlank(message = "Email is required!")
+    @NotBlank(message = "Email không được bỏ trống !")
     private String email;
 }

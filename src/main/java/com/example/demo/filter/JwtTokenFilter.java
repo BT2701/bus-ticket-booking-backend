@@ -2,6 +2,7 @@ package com.example.demo.filter;
 
 import com.example.demo.Model.Customer;
 import com.example.demo.Utils.JwtUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,9 @@ import java.util.List;
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtTokenUtils;
+
+    @Value("${api.prefix}")
+    private String apiPrefix;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
@@ -71,9 +75,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of("/", "POST"),
                 Pair.of("/", "PUT"),
                 Pair.of("/", "DELETE")
-//                Pair.of("/customers/register", "POST"),
-//                Pair.of("/customers/login", "POST"),
-//                Pair.of("/api/buslist", "GET")
+//                Pair.of(String.format("%s/buslist", apiPrefix), "GET"),
+//                Pair.of(String.format("%s/sendEmailToForgotPassword", apiPrefix), "GET"),
+//                Pair.of(String.format("%s/customers/register", apiPrefix), "POST"),
+//                Pair.of(String.format("%s/customers/login", apiPrefix), "POST"),
+//                Pair.of(String.format("%s/customers/refreshToken", apiPrefix), "POST"),
+//                Pair.of(String.format("%s/customers/forgotPassword", apiPrefix), "POST")
         );
 
         for(Pair<String, String> bypassToken : bypassTokens) {

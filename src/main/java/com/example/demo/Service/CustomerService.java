@@ -5,9 +5,11 @@ import com.example.demo.DTO.ForgotPasswordDTO;
 import com.example.demo.DTO.UpdateCustomerDTO;
 import com.example.demo.Model.Customer;
 import com.example.demo.Model.ForgotPassword;
+import com.example.demo.Model.Role;
 import com.example.demo.Model.Token;
 import com.example.demo.Repository.CustomerRepo;
 import com.example.demo.Repository.ForgotPasswordRepo;
+import com.example.demo.Repository.RoleRepo;
 import com.example.demo.Repository.TokenRepo;
 import com.example.demo.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +18,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -30,6 +35,7 @@ public class CustomerService implements ICustomerService{
     private final JwtUtils jwtUtils;
 
     private final TokenRepo tokenRepo;
+    private final RoleRepo roleRepo;
     private final ForgotPasswordRepo forgotPasswordRepo;
 
     private final PasswordEncoder passwordEncoder;
@@ -42,12 +48,14 @@ public class CustomerService implements ICustomerService{
         String email = customerDTO.getEmail();
 
         if(customerRepo.existsByEmail(email)) {
-            throw new Exception("Email already exists !");
+            throw new Exception("Email đã tồn tại !");
         }
 
         if(customerRepo.existsByPhone(phoneNumber)) {
-            throw new Exception("Phone number already exists !");
+            throw new Exception("Phone đã tồn tại !");
         }
+
+        Role role = roleRepo.findByName(Role.ROLE_USER);
 
         Customer newCustomer = Customer.builder()
                 .address(customerDTO.getAddress())
@@ -58,6 +66,7 @@ public class CustomerService implements ICustomerService{
                 .birth(customerDTO.getBirth())
                 .tokens(null)
                 .bookings(null)
+                .role(role)
                 .forgotPassword(null)
                 .build();
 
@@ -78,20 +87,22 @@ public class CustomerService implements ICustomerService{
                 customer = customerRepo.findCustomerByPhone(emailOrPhone);
             }
             if(customer.isEmpty()) {
-                throw new Exception("Invalid phonenumber or email !");
+                throw new Exception("Tài khoản không tồn tại !");
             }
 
             Customer existingCustomer = customer.get();
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     existingCustomer.getPhone(), password, existingCustomer.getAuthorities()
             );
-            authenticationManager.authenticate(authenticationToken);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             return jwtUtils.generateToken(existingCustomer);
         } catch (BadCredentialsException e) {
-            throw new Exception ("Could not login with error : Incorrect password");
+            throw new Exception ("Mật khẩu không chính xác !");
         } catch (Exception e) {
-            throw new Exception("Could not login with error : Invalid username or password AND the error is " + e.getMessage());
+            System.out.println(e.getMessage());
+            throw new Exception("Tài khoản hoặc mật khẩu không chính xác");
         }
     }
 
@@ -109,9 +120,10 @@ public class CustomerService implements ICustomerService{
 
             tokenRepo.deleteAllTokensByCustomer(customer);
             customerRepo.save(customer);
-            return "Password was successfully changed!";
+            return "Thay đổi mật khẩu thành công!";
         } catch (Exception e) {
-            throw new Exception("Could not change password with error : " + e.getMessage());
+            System.out.println(e.getMessage());
+            throw new Exception("Không thể thay đổi mật khẩu !");
         }
     }
 
@@ -119,16 +131,17 @@ public class CustomerService implements ICustomerService{
     public Customer getCustomerDetailsFromToken(String token) throws Exception {
         try {
             if(jwtUtils.isTokenExpired(token)) {
-                throw new DateTimeException("Token is expired !");
+                throw new DateTimeException("Token đã hết hạn !");
             }
 
             String phoneNumber = jwtUtils.extractPhoneNumber(token);
 
             return customerRepo
                     .findCustomerByPhone(phoneNumber)
-                    .orElseThrow(() -> new Exception("Could not find user with phone number " + phoneNumber));
+                    .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số điện thoại : " + phoneNumber));
         } catch (Exception e) {
-            throw new Exception("Token does not exist or does not match current user");
+            System.out.println(e.getMessage());
+            throw new Exception("Token không đúng hoặc không tồn tại!");
         }
     }
 
@@ -136,19 +149,32 @@ public class CustomerService implements ICustomerService{
     public Customer getCustomerDetailsFromRefreshToken(String refreshToken) throws Exception {
         Token token = tokenRepo.findByRefreshToken(refreshToken);
 
-        return getCustomerDetailsFromToken(token.getAccessToken());
+        if(token.getRefreshExpirationDate().isBefore(LocalDateTime.now())) {
+            throw new DateTimeException("Refresh token đã hết hạn !");
+        }
+
+        return customerRepo
+                .findCustomerByPhone(token.getCustomer().getPhone())
+                .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số điện thoại : " + token.getCustomer().getPhone()));
     }
 
     @Override
     public Customer updateCustomer(Integer customerId, UpdateCustomerDTO customerUpadtedDTO) throws Exception {
         Customer existingCustomer = customerRepo.findById(customerId)
-                .orElseThrow(() -> new Exception("Could not find user with id " + customerId));
+                .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với id " + customerId));
 
         String phoneNumber = customerUpadtedDTO.getPhone();
         if(!existingCustomer.getPhone().equals(phoneNumber) && customerRepo.existsByPhone(phoneNumber)) {
-            throw new DataIntegrityViolationException("Phone number already exists !");
+            throw new DataIntegrityViolationException("Số điện thoại đã được sử dụng !");
         }
 
+        String email = customerUpadtedDTO.getEmail();
+        if(!existingCustomer.getEmail().equals(email) && customerRepo.existsByEmail(email)) {
+            throw new DataIntegrityViolationException("Email đã được sử dụng !");
+        }
+        if (customerUpadtedDTO.getEmail() != null) {
+            existingCustomer.setEmail(customerUpadtedDTO.getEmail());
+        }
         if (customerUpadtedDTO.getName() != null) {
             existingCustomer.setName(customerUpadtedDTO.getName());
         }
@@ -160,9 +186,6 @@ public class CustomerService implements ICustomerService{
         }
         if (customerUpadtedDTO.getBirth() != null) {
             existingCustomer.setBirth(customerUpadtedDTO.getBirth());
-        }
-        if (customerUpadtedDTO.getEmail() != null) {
-            existingCustomer.setEmail(customerUpadtedDTO.getEmail());
         }
 
         return customerRepo.save(existingCustomer);
@@ -182,15 +205,17 @@ public class CustomerService implements ICustomerService{
             if(auth.isAuthenticated()) {
                 String encodeNewPassword = passwordEncoder.encode(newPassword);
                 existingCustomer.setPassword(encodeNewPassword);
+
+                customerRepo.save(existingCustomer);
+                return "Mật khẩu đã được thay đổi thành công !";
+            } else {
+                throw new Exception("Mật khẩu cũ không chính xác !");
             }
-
-            customerRepo.save(existingCustomer);
-
-            return "Password was successfully changed!";
         } catch (BadCredentialsException e) {
-            return "Incorrect old password";
+            throw new Exception("Mật khẩu cũ không chính xác !");
         } catch (Exception e) {
-            throw new Exception("Could not change password with error: " + e.getMessage());
+            System.out.println(e.getMessage());
+            throw new Exception("Không thể thay đổi mật khẩu !");
         }
     }
 
@@ -201,9 +226,24 @@ public class CustomerService implements ICustomerService{
             Customer customer = getCustomerDetailsFromToken(accessToken);
             tokenRepo.deleteTokenByAccessTokenAndCustomer(accessToken, customer);
 
-            return "User logged out successfully!";
+            return "Đăng xuất thành công!";
         } catch (Exception e) {
-            throw new Exception("Could not logout with error: " + e.getMessage());
+            System.out.println(e.getMessage());
+            throw new Exception("Không thể đăng xuất !");
+        }
+    }
+
+    @Override
+    @Transactional
+    public String logoutAllFromAccessToken(String accessToken) throws Exception {
+        try {
+            Customer customer = getCustomerDetailsFromToken(accessToken);
+            tokenRepo.deleteAllTokensByCustomer(customer);
+
+            return "Đăng xuất toàn bộ thành công!";
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception("Không thể đăng xuất toàn bộ !");
         }
     }
 }

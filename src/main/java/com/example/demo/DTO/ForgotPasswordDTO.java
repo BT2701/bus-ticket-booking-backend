@@ -11,12 +11,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ForgotPasswordDTO {
-    @NotBlank(message = "Reset Token is required!")
+    @NotBlank(message = "Reset Token không được bỏ trống!")
     private String resetToken;
 
-    @NotBlank(message = "Password is required!")
+    @NotBlank(message = "Mật khẩu mới không được bỏ trống!")
     private String password;
 
-    @NotBlank(message = "Confirm password is required!")
+    @NotBlank(message = "Xác nhận mật khẩu mới không được bỏ trống!")
     private String confirmPassword;
 }
