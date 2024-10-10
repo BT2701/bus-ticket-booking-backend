@@ -10,6 +10,7 @@ public interface ICustomerService {
     String changeAfterForgotPassword (String resetToken, Customer customer, String newPassword) throws Exception;
     String updatePassword (String accessToken, String oldPassword, String newPassword) throws Exception;
     String logout (String accessToken) throws Exception;
+    String logoutAllFromAccessToken(String accessToken) throws Exception;
     Customer getCustomerDetailsFromToken(String token) throws Exception;
     Customer getCustomerDetailsFromRefreshToken(String refreshToken) throws Exception;
     Customer updateCustomer(Integer customerId, UpdateCustomerDTO customerUpadtedDTO) throws Exception;

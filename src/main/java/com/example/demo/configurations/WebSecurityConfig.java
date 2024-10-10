@@ -1,16 +1,19 @@
 package com.example.demo.configurations;
 
+import com.example.demo.Model.Role;
 import com.example.demo.filter.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,14 +22,15 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.http.HttpMethod.*;
-
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
+
+    @Value("${api.prefix}")
+    private String apiPrefix;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception{
@@ -35,16 +39,36 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests
                             .anyRequest().permitAll();
-
-//                            .requestMatchers("POST", "/customers/login").permitAll()
-//                            .requestMatchers("POST", "/customers/register").permitAll()
-//                            .requestMatchers("POST", "/customers/refreshToken").permitAll()
+//                            .requestMatchers(
+//                                    String.format("%s/customers/login", apiPrefix),
+//                                    String.format("%s/customers/register", apiPrefix),
+//                                    String.format("%s/customers/refreshToken", apiPrefix),
+//                                    String.format("%s/customers/forgotPassword", apiPrefix),
+//                                    String.format("%s/sendEmailToForgotPassword", apiPrefix),
+//                                    String.format("%s/buslist", apiPrefix)
+//                            ).permitAll()
 //
-//                            .requestMatchers("PUT", "/customers/update").hasRole("USER")
-//                            .requestMatchers("GET", "/customers/details").hasRole("USER")
+//                            .requestMatchers("GET", String.format("%s/customers/details", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
+//                            .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
+//                            .requestMatchers("POST", String.format("%s/customers/logoutAll", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
+//                            .requestMatchers("PUT", String.format("%s/customers/**", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
+//
+//                            // roles
+//                            .requestMatchers("POST", String.format("%s/roles", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("GET", String.format("%s/roles**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("GET", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("PUT", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("DELETE", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("POST", String.format("%s/roles/assign", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+//
 //                            .anyRequest().authenticated();
                 })
                 .csrf(AbstractHttpConfigurer::disable);
+//                .exceptionHandling(
+//                        e->e
+//                                .accessDeniedHandler((request, response, accessDeniedException)->response.setStatus(403))
+//                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+//                );
         http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
             @Override
             public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {

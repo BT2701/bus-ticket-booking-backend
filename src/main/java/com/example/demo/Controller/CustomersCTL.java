@@ -26,19 +26,9 @@ public class CustomersCTL {
     @PostMapping("/register")
     public ResponseEntity<?> register (@Valid @RequestBody CustomerDTO customerDTO, BindingResult result) throws Exception {
         try {
-            if(result.hasErrors()) {
-                List<String> errorMessages = result.getFieldErrors()
-                        .stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-
-                return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(String.valueOf(errorMessages))
-                                .data(null)
-                                .build()
-                );
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
 
@@ -46,7 +36,7 @@ public class CustomersCTL {
                 return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
-                                .message("Password does not match !")
+                                .message("Mật khẩu và xác nhận mật khẩu không trùng nhau !")
                                 .data(null)
                                 .build()
                 );
@@ -57,37 +47,21 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.CREATED.value())
-                            .message("Register successfully!")
+                            .message("Đăng ký thành công!")
                             .data(customer)
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login (@Valid @RequestBody LoginDTO loginDTO, BindingResult result) throws Exception {
         try {
-            if(result.hasErrors()) {
-                List<String> errorMessages = result.getFieldErrors()
-                       .stream()
-                       .map(FieldError::getDefaultMessage)
-                       .toList();
-
-                return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(String.valueOf(errorMessages))
-                                .data(null)
-                                .build()
-                );
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
             String token = customerService.login(loginDTO.getEmailOrPhone(), loginDTO.getPassword());
@@ -97,7 +71,7 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
-                            .message("Login successfully !")
+                            .message("Đăng nhập thành công !")
                             .data(LoginResponseDTO.builder()
                                     .id(customerDetails.getId())
                                     .username(customerDetails.getPhone())
@@ -108,39 +82,23 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
     @PutMapping("/forgotPassword")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO forgotPasswordDTO, BindingResult result) {
         try {
-            if(result.hasErrors()) {
-                List<String> errorMessages =  result.getFieldErrors()
-                        .stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-
-                return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(String.valueOf(errorMessages))
-                                .data(null)
-                                .build()
-                );
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
             if(!forgotPasswordDTO.getPassword().equals(forgotPasswordDTO.getConfirmPassword())) {
                 return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
-                                .message("Password and retype password do not match !")
+                                .message("Mật khẩu và xác nhận mật khẩu không trùng nhau !")
                                 .data(null)
                                 .build()
                 );
@@ -158,13 +116,7 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
@@ -177,7 +129,7 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
-                            .message("Refresh token successfully !")
+                            .message("Làm mới token thành công !")
                             .data(LoginResponseDTO.builder()
                                     .accessToken(jwtToken.getAccessToken())
                                     .refreshToken(jwtToken.getRefreshToken())
@@ -187,32 +139,16 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message("Refresh token failed !")
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
     @PutMapping("/updatePassword")
     public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String token, @Valid @RequestBody UpdatePasswordDTO updatePasswordDTO, BindingResult result) {
         try {
-            if(result.hasErrors()) {
-                List<String> errorMessages =  result.getFieldErrors()
-                        .stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-
-                return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(String.valueOf(errorMessages))
-                                .data(null)
-                                .build()
-                );
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
             }
 
             String accessToken = token.substring(7);
@@ -221,28 +157,21 @@ public class CustomersCTL {
                 return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.BAD_REQUEST.value())
-                                .message("New password and confirm password do not match!")
+                                .message("Mật khẩu mới và xác nhận mật khẩu mới không trùng nhau !")
                                 .data(null)
                                 .build()
                 );
             }
 
-            customerService.updatePassword(accessToken, updatePasswordDTO.getOldPassword(), updatePasswordDTO.getNewPassword());
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.NO_CONTENT.value())
-                            .message("Password updated successfully!")
+                            .message(customerService.updatePassword(accessToken, updatePasswordDTO.getOldPassword(), updatePasswordDTO.getNewPassword()))
                             .data(null)
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
@@ -258,13 +187,23 @@ public class CustomersCTL {
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
+            return CustomersCTL.handleError(e);
+        }
+    }
+
+    @PostMapping("/logoutAll")
+    public ResponseEntity<?> logoutAll(@RequestHeader("Authorization") String token) {
+        try {
+            String accessToken = token.substring(7);
+            return ResponseEntity.ok(
                     ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
+                            .status(HttpStatus.NO_CONTENT.value())
+                            .message(customerService.logoutAllFromAccessToken(accessToken))
                             .data(null)
                             .build()
             );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
         }
     }
 
@@ -287,18 +226,12 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
-                            .message("Get details of the customer successfully!")
+                            .message("Lấy thông tin chi tiết người dùng thành công!")
                             .data(customerResponseDTO)
                             .build()
             );
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ResponseDTO.builder()
-                            .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
-                            .data(null)
-                            .build()
-            );
+            return CustomersCTL.handleError(e);
         }
     }
 
@@ -310,25 +243,18 @@ public class CustomersCTL {
             @RequestHeader("Authorization") String authorization
     ) {
         try {
-            if(result.hasErrors()) {
-                List<String> errorMessages = result.getFieldErrors().stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-                return ResponseEntity.badRequest().body(
-                        ResponseDTO.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(String.valueOf(errorMessages))
-                                .data(null)
-                                .build()
-                );
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
             }
+
             String extractedToken = authorization.substring(7);
             Customer user = customerService.getCustomerDetailsFromToken(extractedToken);
             if(user.getId() != userId) {
                 return ResponseEntity.badRequest().body(
                         ResponseDTO.builder()
-                                .status(HttpStatus.FORBIDDEN.value())
-                                .message("Invalid user!")
+                                .status(HttpStatus.UNAUTHORIZED.value())
+                                .message("Người dùng không trùng khớp với id = " + userId)
                                 .data(null)
                                 .build()
                 );
@@ -349,18 +275,39 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
-                            .message("Update user successfully!")
+                            .message("Cập nhật người dùng thành công!")
                             .data(customerResponseDTO)
                             .build()
             );
         } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+    public static ResponseEntity<ResponseDTO> handleValidationErrors(BindingResult result) {
+        if(result.hasErrors()) {
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .toList();
+
             return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
-                            .message(e.getMessage())
+                            .message(String.join(", ", errorMessages))
                             .data(null)
                             .build()
             );
         }
+        return null;
+    }
+
+    public static ResponseEntity<?> handleError(Exception e) {
+        return ResponseEntity.badRequest().body(
+                ResponseDTO.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .message(e.getMessage())
+                        .data(null)
+                        .build()
+        );
     }
 }

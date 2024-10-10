@@ -15,10 +15,10 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginDTO {
-    @NotBlank(message = "Email or phone number is required")
+    @NotBlank(message = "Tài khoản không được bỏ trống !")
     @JsonProperty("username")
     private String emailOrPhone;
 
-    @NotBlank(message = "Password is required!")
+    @NotBlank(message = "Mật khẩu không được bỏ trống !")
     private String password;
 }
