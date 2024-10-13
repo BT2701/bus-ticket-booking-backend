@@ -2,6 +2,7 @@ package com.example.demo.Repository;
 import com.example.demo.Model.Route;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
@@ -14,7 +15,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "            JOIN stations sTo ON sTo.id = r.to" +
             "            WHERE b.time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) " +
             "            GROUP BY r.id " +
-            "ORDER BY `quantityTicket` DESC LIMIT 3;"
+            "ORDER BY `quantityTicket` DESC LIMIT :numLimit;"
             ,  nativeQuery = true)
-    List<Object[]> findMostPopularRoute();
+    List<Object[]> findMostPopularRoute(@Param("numLimit") int numLimit);
 }

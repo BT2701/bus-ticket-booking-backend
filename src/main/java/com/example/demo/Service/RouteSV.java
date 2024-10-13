@@ -10,8 +10,8 @@ public class RouteSV {
     @Autowired
     private RouteRepo routeRepo;
 
-    public List<Object[]> getMostPopularRoute() {
-        List<Object[]> results = routeRepo.findMostPopularRoute();
+    public List<Object[]> getMostPopularRoute(int numLimit) {
+        List<Object[]> results = routeRepo.findMostPopularRoute(numLimit);
         return results.isEmpty() ? null : results; // Return the top result or null if not found
     }
 }
