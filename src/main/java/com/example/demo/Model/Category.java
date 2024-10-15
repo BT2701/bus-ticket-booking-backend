@@ -19,4 +19,6 @@ public class Category {
     private List<Bus> buses;
     @Column(nullable = false)
     private int seat_count;
+    @Column
+    private Double price;
 }

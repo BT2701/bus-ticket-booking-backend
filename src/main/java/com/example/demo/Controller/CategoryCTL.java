@@ -1,7 +1,7 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Model.Bus;
-import com.example.demo.Service.BusSV;
+import com.example.demo.Model.Category;
+import com.example.demo.Service.CategorySV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,12 +11,11 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "${frontend.url}", allowCredentials = "true")
-public class BusCTL {
+public class CategoryCTL {
     @Autowired
-    private BusSV busSV;
-
-    @GetMapping("/api/buslist")
-    public List<Bus> getBusList() {
-        return busSV.getBuses();
+    private CategorySV categorySV;
+    @GetMapping("api/categories")
+    public List<Category> getCategories() {
+        return categorySV.getAllCategory();
     }
 }

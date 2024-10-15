@@ -31,4 +31,9 @@ public class RouteSV {
                 lowestPrice, highestPrice, busTypes, sortParam);
     }
 
+    public List<Object[]> getMostPopularRoute(int numLimit) {
+        List<Object[]> results = routeRepo.findMostPopularRoute(numLimit);
+        return results.isEmpty() ? null : results; // Return the top result or null if not found
+    }
+
 }

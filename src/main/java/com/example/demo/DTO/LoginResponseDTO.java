@@ -10,9 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LoginResponseDTO {
-    @JsonProperty("message")
-    private String message;
-
     @JsonProperty("id")
     private int id;
 

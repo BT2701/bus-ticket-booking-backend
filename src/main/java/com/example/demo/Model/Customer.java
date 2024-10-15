@@ -36,8 +36,11 @@ public class Customer implements UserDetails {
 
     @Column(unique = true)
     private String email;
+
     @Column
+    @JsonIgnore
     private String password;
+
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     private List<Booking> bookings;
@@ -47,11 +50,17 @@ public class Customer implements UserDetails {
     private List<Token> tokens;
 
     @OneToOne(mappedBy = "customer")
+    @JsonIgnore
     private ForgotPassword forgotPassword;
 
+    @ManyToOne
+    @JoinColumn(name = "role")
+    private Role role;
+
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.getRole().getName().toUpperCase()));
     }
     @Override
     public String getUsername() {
@@ -59,21 +68,25 @@ public class Customer implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }

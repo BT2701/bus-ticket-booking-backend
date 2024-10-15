@@ -1,5 +1,4 @@
 package com.example.demo.Repository;
-
 import com.example.demo.Model.Route;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,8 +6,10 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
+@Repository
 public interface RouteRepo extends JpaRepository<Route, Integer> {
 
     // Lấy các địa điểm duy nhất từ cột 'from'
@@ -21,7 +22,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     List<String> findUniqueToLocations();
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, "
-            + "(b.seatcount - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
+            + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
             + "r.duration, f.name as fromStation, t.name as toStation "
             + "FROM schedules s "
             + "JOIN s.bus b "
@@ -36,7 +37,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             + "AND (:lowestPrice IS NULL OR s.price >= :lowestPrice) "
             + "AND (:highestPrice IS NULL OR s.price <= :highestPrice) "
             + "AND (:busTypes IS NULL OR c.name IN :busTypes) "
-            + "GROUP BY c.name, s.departure, s.arrival, s.price, b.seatcount, r.duration, f.name, t.name "
+            + "GROUP BY c.name, s.departure, s.arrival, s.price, c.seat_count, r.duration, f.name, t.name "
             + "ORDER BY "
             + "CASE WHEN :sortParam IS NULL OR :sortParam = '' OR :sortParam = 'earliestDeparture' THEN s.departure END ASC, "
             + "CASE WHEN :sortParam = 'latestDeparture' THEN s.departure END DESC, "
@@ -55,4 +56,15 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
     //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
 
+    @Query(value = "SELECT r.id,r.distance, r.duration, sch.price,sFrom.address,sTo.address, COUNT(b.id) AS quantityTicket " +
+            "            FROM routes r " +
+            "            JOIN schedules sch ON r.id = sch.route " +
+            "            JOIN bookings b ON sch.id = b.schedule " +
+            "            JOIN stations sFrom ON sFrom.id = r.from" +
+            "            JOIN stations sTo ON sTo.id = r.to" +
+            "            WHERE b.time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) " +
+            "            GROUP BY r.id " +
+            "ORDER BY `quantityTicket` DESC LIMIT :numLimit;"
+            ,  nativeQuery = true)
+    List<Object[]> findMostPopularRoute(@Param("numLimit") int numLimit);
 }
