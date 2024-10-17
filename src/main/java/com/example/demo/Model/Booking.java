@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity(name = "bookings")
 @Data
@@ -28,4 +29,8 @@ public class Booking {
     @OneToOne(mappedBy = "booking")
     @JsonIgnore
     private Payment payment;
+
+    @OneToMany(mappedBy = "booking")
+    @JsonIgnore
+    private List<Feedback> feedbacks;
 }
