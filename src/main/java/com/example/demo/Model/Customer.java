@@ -37,6 +37,13 @@ public class Customer implements UserDetails {
     @Column(unique = true)
     private String email;
 
+<<<<<<< truongnn
+=======
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    private List<Notification> notifications;
+
+>>>>>>> local
     @Column
     @JsonIgnore
     private String password;
