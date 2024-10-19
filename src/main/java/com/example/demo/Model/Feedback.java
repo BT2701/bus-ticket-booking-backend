@@ -23,6 +23,7 @@ public class Feedback {
     private Timestamp date;
 
 
+
     @ManyToOne
     @JoinColumn(name = "booking")
     private Booking booking;

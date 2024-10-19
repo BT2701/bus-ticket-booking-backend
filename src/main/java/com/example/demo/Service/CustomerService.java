@@ -55,7 +55,7 @@ public class CustomerService implements ICustomerService{
             throw new Exception("Phone đã tồn tại !");
         }
 
-        Role role = roleRepo.findByName(Role.ROLE_USER);
+        Role role = roleRepo.findByName(Role.ROLE_CUSTOMER);
 
         Customer newCustomer = Customer.builder()
                 .address(customerDTO.getAddress())
@@ -68,6 +68,7 @@ public class CustomerService implements ICustomerService{
                 .bookings(null)
                 .role(role)
                 .forgotPassword(null)
+                .isActive(true)
                 .build();
 
         String encodePassword = passwordEncoder.encode(customerDTO.getPassword());
@@ -102,7 +103,7 @@ public class CustomerService implements ICustomerService{
             throw new Exception ("Mật khẩu không chính xác !");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new Exception("Tài khoản hoặc mật khẩu không chính xác");
+            throw new Exception("Tài khoản hoặc mật khẩu không chính xác " + e.getMessage());
         }
     }
 
@@ -245,5 +246,23 @@ public class CustomerService implements ICustomerService{
             System.out.println(e.getMessage());
             throw new Exception("Không thể đăng xuất toàn bộ !");
         }
+    }
+
+    public boolean lockAccount(int id) throws Exception {
+        Customer customer = customerRepo.findById(id)
+                .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số id : " + id));;
+
+        customer.setActive(false);
+        customerRepo.save(customer);
+        return true;
+    }
+
+    public boolean unlockAccount(int id) throws Exception {
+        Customer customer = customerRepo.findById(id)
+                .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số id : " + id));;
+
+        customer.setActive(true);
+        customerRepo.save(customer);
+        return true;
     }
 }

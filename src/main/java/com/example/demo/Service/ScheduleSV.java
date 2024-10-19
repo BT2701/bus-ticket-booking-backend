@@ -24,4 +24,7 @@ public class ScheduleSV {
     public Schedule getScheduleById(int id){
         return scheduleRepo.findById(id).orElse(null);
     }
+    public List<Schedule> getSchedulesByDriverId(int driverId) {
+        return scheduleRepo.findByDriverId(driverId);
+    }
 }

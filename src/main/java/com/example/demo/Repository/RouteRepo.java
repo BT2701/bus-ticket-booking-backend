@@ -23,11 +23,8 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, "
             + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
-<<<<<<< truongnn
-            + "r.duration, f.name as fromStation, t.name as toStation "
-=======
-            + "r.duration, f.name as fromStation, t.name as toStation, s.id "
->>>>>>> local
+
+            + "r.duration, f.name as fromStation, t.name as toStation, s.id  "
             + "FROM schedules s "
             + "JOIN s.bus b "
             + "JOIN b.category c "

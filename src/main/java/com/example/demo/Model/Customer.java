@@ -37,16 +37,18 @@ public class Customer implements UserDetails {
     @Column(unique = true)
     private String email;
 
-<<<<<<< truongnn
-=======
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     private List<Notification> notifications;
 
->>>>>>> local
+
     @Column
     @JsonIgnore
     private String password;
+
+    @Column
+    @JsonIgnore
+    private boolean isActive;
 
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
@@ -62,6 +64,7 @@ public class Customer implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "role")
+    @JsonIgnore
     private Role role;
 
     @Override
@@ -83,7 +86,7 @@ public class Customer implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isAccountNonLocked() {
-        return true;
+        return this.isActive;
     }
 
     @Override
