@@ -4,10 +4,8 @@ package com.example.demo.Controller;
 import com.example.demo.Model.Schedule;
 import com.example.demo.Service.ScheduleSV;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,5 +32,11 @@ public class ScheduleCTL {
     @GetMapping("api/schedule")
     public Schedule getById(@RequestParam("id") int id){
         return scheduleSV.getScheduleById(id);
+    }
+
+    @GetMapping("api/schedule/driver/{driverId}")
+    public ResponseEntity<List<Schedule>> getSchedulesByDriver(@PathVariable int driverId) {
+        List<Schedule> schedules = scheduleSV.getSchedulesByDriverId(driverId);
+        return ResponseEntity.ok(schedules);
     }
 }

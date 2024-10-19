@@ -26,6 +26,7 @@ public class Role {
     @JsonIgnore
     private List<Customer> customer;
 
-    public static String ROLE_USER = "USER";
     public static String ROLE_ADMIN = "ADMIN";
+    public static String ROLE_STAFF = "STAFF";
+    public static String ROLE_CUSTOMER = "CUSTOMER";
 }
