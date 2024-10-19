@@ -23,6 +23,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, "
             + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
+
             + "r.duration, f.name as fromStation, t.name as toStation, s.id  "
             + "FROM schedules s "
             + "JOIN s.bus b "
@@ -52,6 +53,17 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
                                             @Param("busTypes") List<String> busTypes,
                                             @Param("sortParam") String sortParam);
 
+    @Query("SELECT c.name as busType, r.distance  , r.duration, s.price, f.name as fromStation, t.name as toStation,f.address,t.address "
+            + "FROM schedules s "
+            + "JOIN s.bus b "
+            + "JOIN b.category c "
+            + "JOIN s.route r "
+            + "JOIN r.from f "
+            + "JOIN r.to t "
+            + "ORDER BY t.address ASC")
+    List<Object[]> findAllBusRoutes();
+
+
 
     //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
     //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
@@ -67,4 +79,6 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "ORDER BY `quantityTicket` DESC LIMIT :numLimit;"
             ,  nativeQuery = true)
     List<Object[]> findMostPopularRoute(@Param("numLimit") int numLimit);
+
+
 }
