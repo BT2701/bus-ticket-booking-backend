@@ -283,6 +283,41 @@ public class CustomersCTL {
             return CustomersCTL.handleError(e);
         }
     }
+
+    @PutMapping("/lock/{id}")
+    public ResponseEntity<?> lockAccount(@PathVariable int id) {
+        try {
+            boolean isLocked = customerService.lockAccount(id);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.ACCEPTED.value())
+                            .message("Tài khoản đã bị khóa.")
+                            .data(isLocked)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
+    @PutMapping("/unlock/{id}")
+    public ResponseEntity<?> unlockAccount(@PathVariable int id) {
+        try {
+            boolean isLocked = customerService.unlockAccount(id);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.ACCEPTED.value())
+                            .message("Tài khoản đã được mở khóa.")
+                            .data(isLocked)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
     public static ResponseEntity<ResponseDTO> handleValidationErrors(BindingResult result) {
         if(result.hasErrors()) {
             List<String> errorMessages = result.getFieldErrors()

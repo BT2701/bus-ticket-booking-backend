@@ -49,6 +49,10 @@ public class Customer implements UserDetails {
     @JsonIgnore
     private String password;
 
+    @Column
+    @JsonIgnore
+    private boolean isActive;
+
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     private List<Booking> bookings;
@@ -63,6 +67,7 @@ public class Customer implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "role")
+    @JsonIgnore
     private Role role;
 
     @Override
@@ -84,7 +89,7 @@ public class Customer implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isAccountNonLocked() {
-        return true;
+        return this.isActive;
     }
 
     @Override
