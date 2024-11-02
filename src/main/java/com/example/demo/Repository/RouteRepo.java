@@ -1,5 +1,6 @@
 package com.example.demo.Repository;
 import com.example.demo.Model.Route;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -68,17 +69,17 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
     //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
 
-    @Query(value = "SELECT r.id,r.distance, r.duration, sch.price,sFrom.address,sTo.address, COUNT(b.id) AS quantityTicket " +
-            "            FROM routes r " +
-            "            JOIN schedules sch ON r.id = sch.route " +
-            "            JOIN bookings b ON sch.id = b.schedule " +
-            "            JOIN stations sFrom ON sFrom.id = r.from" +
-            "            JOIN stations sTo ON sTo.id = r.to" +
-            "            WHERE b.time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) " +
-            "            GROUP BY r.id " +
-            "ORDER BY `quantityTicket` DESC LIMIT :numLimit;"
-            ,  nativeQuery = true)
-    List<Object[]> findMostPopularRoute(@Param("numLimit") int numLimit);
+    @Query("SELECT r.id, r.distance, r.duration, sch, sFrom.address, sTo.address, COUNT(b.id) AS quantityTicket " +
+            "FROM routes r " +
+            "JOIN r.schedules sch " +
+            "JOIN sch.bookings b " +
+            "JOIN r.from sFrom " +
+            "JOIN r.to sTo " +
+            "WHERE b.time >= CURRENT_DATE - 1 MONTH " +
+            "GROUP BY r.id, sch.id " +
+            "ORDER BY quantityTicket DESC")
+    List<Object[]> findMostPopularRoute(Pageable pageable);
+
 
 
 }

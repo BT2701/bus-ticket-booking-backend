@@ -27,4 +27,16 @@ public class Schedule {
     private Route route;
     @OneToMany(mappedBy = "schedule")
     private List<Booking> bookings;
+
+    @Transient
+    public void calculatePrice() {
+        this.price = this.bus.getCategory().getPrice() * this.route.getDistance();
+    }
+
+    @PostLoad
+    @PrePersist
+    @PreUpdate
+    private void setPriceAutomatically() {
+        calculatePrice();
+    }
 }
