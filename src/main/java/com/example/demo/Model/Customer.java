@@ -64,7 +64,6 @@ public class Customer implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "role")
-    @JsonIgnore
     private Role role;
 
     @Override

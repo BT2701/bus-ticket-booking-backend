@@ -5,6 +5,7 @@ import com.example.demo.Service.DriverSV;
 import com.example.demo.Service.FileSV;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
@@ -25,8 +26,13 @@ public class DriverCTL {
     private final String path = "uploads/driverImages/";
 
     @GetMapping("")
-    public ResponseEntity<?> getAllDrivers() {
-        ArrayList<Driver> drivers = driverSV.getAllDrivers();
+    public ResponseEntity<?> getAllDrivers(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Page<Driver> drivers = driverSV.getAllDrivers(pageNo, pageSize, sortBy, sortDir);
         return ResponseEntity.ok(drivers);
     }
 

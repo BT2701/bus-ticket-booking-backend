@@ -1,8 +1,13 @@
 package com.example.demo.Service;
 
+import com.example.demo.Model.Customer;
 import com.example.demo.Model.Driver;
 import com.example.demo.Repository.DriverRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,8 +18,10 @@ import java.util.Optional;
 public class DriverSV {
     private final DriverRepo driverRepository;
 
-    public ArrayList<Driver> getAllDrivers() {
-        return (ArrayList<Driver>) driverRepository.findAll();
+    public Page<Driver> getAllDrivers(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        return driverRepository.findAll(pageable);
     }
 
     public Optional<Driver> getDriverById(int id) {
