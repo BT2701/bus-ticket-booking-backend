@@ -14,6 +14,10 @@ import com.example.demo.Repository.TokenRepo;
 import com.example.demo.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +45,11 @@ public class CustomerService implements ICustomerService{
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
+    public Page<Customer> getCustomers(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        return customerRepo.findAll(pageable);
+    }
 
     @Override
     public Customer createCustomer(CustomerDTO customerDTO) throws Exception {
@@ -224,8 +233,7 @@ public class CustomerService implements ICustomerService{
     @Transactional
     public String logout(String accessToken) throws Exception {
         try {
-            Customer customer = getCustomerDetailsFromToken(accessToken);
-            tokenRepo.deleteTokenByAccessTokenAndCustomer(accessToken, customer);
+            tokenRepo.deleteTokenByAccessToken(accessToken);
 
             return "Đăng xuất thành công!";
         } catch (Exception e) {

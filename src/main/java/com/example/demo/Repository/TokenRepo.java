@@ -16,5 +16,5 @@ public interface TokenRepo extends JpaRepository<Token, Long> {
     List<Token> findByCustomer(Customer customer);
 
     void deleteAllTokensByCustomer(Customer customer);
-    void deleteTokenByAccessTokenAndCustomer(String accessToken, Customer customer);
+    void deleteTokenByAccessToken(String accessToken);
 }
