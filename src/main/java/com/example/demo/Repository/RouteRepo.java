@@ -22,7 +22,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     @Query("SELECT DISTINCT s.address FROM routes r JOIN r.to s")
     List<String> findUniqueToLocations();
 
-    @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, "
+    @Query("SELECT c.name as busType, s.departure, s.arrival, s, "
             + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
 
             + "r.duration, f.name as fromStation, t.name as toStation, s.id  "
@@ -54,7 +54,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
                                             @Param("busTypes") List<String> busTypes,
                                             @Param("sortParam") String sortParam);
 
-    @Query("SELECT c.name as busType, r.distance  , r.duration, s.price, f.name as fromStation, t.name as toStation,f.address,t.address "
+    @Query("SELECT c.name as busType, r.distance  , r.duration, s, f.name as fromStation, t.name as toStation,f.address,t.address "
             + "FROM schedules s "
             + "JOIN s.bus b "
             + "JOIN b.category c "
