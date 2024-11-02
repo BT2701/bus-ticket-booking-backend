@@ -25,8 +25,13 @@ public class BusCTL {
     private final FileSV fileSV;
 
     @GetMapping("/api/buslist")
-    public List<Bus> getBusList() {
-        return busSV.getBuses();
+    public ResponseEntity<?> getBusList(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return ResponseEntity.ok(busSV.getBuses(pageNo, pageSize, sortBy, sortDir));
     }
 
     @PostMapping("/api/assignDriverToBus")
