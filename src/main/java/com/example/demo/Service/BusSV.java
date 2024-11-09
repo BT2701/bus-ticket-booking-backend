@@ -9,6 +9,10 @@ import com.example.demo.Repository.BusRepo;
 import com.example.demo.Repository.CategoryRepo;
 import com.example.demo.Repository.DriverRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -29,8 +33,10 @@ public class BusSV {
 
     private final String path = "uploads/busImages/";
 
-    public List<Bus> getBuses() {
-        return busRepo.findAll();
+    public Page<Bus> getBuses(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        return busRepo.findAll(pageable);
     }
     public Bus getBus(int id) {
         return busRepo.findById(id).get();

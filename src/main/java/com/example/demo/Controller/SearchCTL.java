@@ -37,6 +37,11 @@ public class SearchCTL {
 
         return ResponseEntity.ok(uniqueLocations); // Trả về danh sách địa điểm
     }
+    @GetMapping("/get-all-routes")
+    public ResponseEntity<List<Object[]>> findAllBusRoutes() {
+        List<Object[]> routes = routeSV.findAllBusRoutes();
+        return ResponseEntity.ok(routes);
+    }
 
     // Endpoint cho việc tìm kiếm
     @GetMapping("/search")

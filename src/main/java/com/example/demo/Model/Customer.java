@@ -39,11 +39,8 @@ public class Customer implements UserDetails {
 
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
-    private List<Feedback> feedbacks;
-
-    @OneToMany(mappedBy = "customer")
-    @JsonIgnore
     private List<Notification> notifications;
+
 
     @Column
     @JsonIgnore
@@ -67,7 +64,6 @@ public class Customer implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "role")
-    @JsonIgnore
     private Role role;
 
     @Override

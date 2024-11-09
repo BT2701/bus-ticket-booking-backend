@@ -3,6 +3,8 @@ package com.example.demo.Model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 @Entity(name = "contact_us")
 @Data
 public class Contact {
@@ -19,4 +21,11 @@ public class Contact {
     private String title;
     @Column(nullable = false,length = 255)
     private String content;
+    @Column
+    private int status;
+    @Column
+    private Timestamp create_at;
+    @Column
+    private Timestamp update_at;
+
 }

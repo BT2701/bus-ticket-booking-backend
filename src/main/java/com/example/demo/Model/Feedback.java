@@ -22,9 +22,7 @@ public class Feedback {
     @Column
     private Timestamp date;
 
-    @ManyToOne
-    @JoinColumn(name = "customer")
-    private Customer customer;
+
 
     @ManyToOne
     @JoinColumn(name = "booking")
