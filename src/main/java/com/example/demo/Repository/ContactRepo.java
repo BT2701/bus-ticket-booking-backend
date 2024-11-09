@@ -1,12 +1,7 @@
 package com.example.demo.Repository;
-<<<<<<< HEAD
 
-public class ContactRepo {
-=======
 import com.example.demo.Model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,5 +24,4 @@ public interface ContactRepo extends JpaRepository<Contact, Integer> {
     @Query("SELECT c.status FROM contact_us c WHERE c.id = :id")
     int getContactStatusById(@Param("id") int id);
 
->>>>>>> 7ff0c7e0d03a5a208946ea65d332d59e1aa20939
 }

@@ -1,8 +1,6 @@
 package com.example.demo.Controller;
 
-<<<<<<< HEAD
-public class FeedbackCTL {
-=======
+
 import com.example.demo.Model.Feedback;
 import com.example.demo.Service.FeedbackSV; // Import service
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,5 +62,4 @@ public class FeedbackCTL {
     }
 
 
->>>>>>> 7ff0c7e0d03a5a208946ea65d332d59e1aa20939
 }

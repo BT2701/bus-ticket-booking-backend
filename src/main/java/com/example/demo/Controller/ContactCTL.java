@@ -1,8 +1,5 @@
 package com.example.demo.Controller;
 
-<<<<<<< HEAD
-public class ContactCTL {
-=======
 import com.example.demo.Model.Contact; // Import model Contact
 import com.example.demo.Service.ContactSV; // Import service ContactSV
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +44,4 @@ public class ContactCTL {
 
         return isSent;
     }
->>>>>>> 7ff0c7e0d03a5a208946ea65d332d59e1aa20939
 }
