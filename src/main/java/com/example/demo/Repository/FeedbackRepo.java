@@ -1,5 +1,8 @@
 package com.example.demo.Repository;
 
+<<<<<<< HEAD
+public class FeedbackRepo {
+=======
 import com.example.demo.Model.Feedback;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,4 +49,5 @@ public interface FeedbackRepo extends JpaRepository<Feedback, Integer> {
     long countFeedbackByScheduleIdAndRating(@Param("scheduleId") int scheduleId, @Param("rating") int rating);
 
 
+>>>>>>> 7ff0c7e0d03a5a208946ea65d332d59e1aa20939
 }

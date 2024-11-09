@@ -22,13 +22,8 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return phoneNumber -> customerRepo
                 .findCustomerByPhone(phoneNumber)
-                .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with phone number " + phoneNumber));
+                .orElseThrow(() -> new UsernameNotFoundException("Không thể tìm người dùng với số điện thoại : " + phoneNumber));
     };
-
-    private boolean isEmail(String identifier) {
-        String emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        return identifier.matches(emailPattern);
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

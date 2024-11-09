@@ -3,6 +3,8 @@ package com.example.demo.Service;
 import com.example.demo.Model.Route;
 import com.example.demo.Repository.RouteRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,7 +38,8 @@ public class RouteSV {
     }
 
     public List<Object[]> getMostPopularRoute(int numLimit) {
-        List<Object[]> results = routeRepo.findMostPopularRoute(numLimit);
+        Pageable pageable = PageRequest.of(0, numLimit);
+        List<Object[]> results = routeRepo.findMostPopularRoute(pageable);
         return results.isEmpty() ? null : results; // Return the top result or null if not found
     }
 

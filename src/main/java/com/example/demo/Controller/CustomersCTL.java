@@ -7,6 +7,7 @@ import com.example.demo.Service.CustomerService;
 import com.example.demo.Service.TokenSV;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,16 @@ import java.util.Map;
 public class CustomersCTL {
     private final CustomerService customerService;
     private final TokenSV tokenService;
+
+    @GetMapping("")
+    public Page<Customer> getCustomers(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        return customerService.getCustomers(pageNo, pageSize, sortBy, sortDir);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register (@Valid @RequestBody CustomerDTO customerDTO, BindingResult result) throws Exception {
@@ -213,21 +224,11 @@ public class CustomersCTL {
             String extractedToken = token.substring(7); // loại bỏ Bearer
             Customer user = customerService.getCustomerDetailsFromToken(extractedToken);
 
-            CustomerResponseDTO customerResponseDTO = CustomerResponseDTO.builder()
-                    .id(user.getId())
-                    .name(user.getName())
-                    .email(user.getEmail())
-                    .address(user.getAddress())
-                    .phone(user.getPhone())
-                    .birth(user.getBirth())
-                    .bookings(user.getBookings())
-                    .build();
-
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
                             .message("Lấy thông tin chi tiết người dùng thành công!")
-                            .data(customerResponseDTO)
+                            .data(user)
                             .build()
             );
         } catch (Exception e) {
@@ -283,6 +284,41 @@ public class CustomersCTL {
             return CustomersCTL.handleError(e);
         }
     }
+
+    @PutMapping("/lock/{id}")
+    public ResponseEntity<?> lockAccount(@PathVariable int id) {
+        try {
+            boolean isLocked = customerService.lockAccount(id);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.ACCEPTED.value())
+                            .message("Tài khoản đã bị khóa.")
+                            .data(isLocked)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
+    @PutMapping("/unlock/{id}")
+    public ResponseEntity<?> unlockAccount(@PathVariable int id) {
+        try {
+            boolean isLocked = customerService.unlockAccount(id);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.ACCEPTED.value())
+                            .message("Tài khoản đã được mở khóa.")
+                            .data(isLocked)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
     public static ResponseEntity<ResponseDTO> handleValidationErrors(BindingResult result) {
         if(result.hasErrors()) {
             List<String> errorMessages = result.getFieldErrors()

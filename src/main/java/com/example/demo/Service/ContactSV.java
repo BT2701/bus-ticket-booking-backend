@@ -1,5 +1,5 @@
 package com.example.demo.Service;
-
+    
 import com.example.demo.Model.Contact; // Import model Contact
 import com.example.demo.Repository.ContactRepo; // Import repository
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +7,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Import @Transactional
-
-
 import java.sql.Timestamp;
 import java.util.List;
 

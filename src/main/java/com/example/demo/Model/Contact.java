@@ -27,4 +27,5 @@ public class Contact {
     private Timestamp create_at;
     @Column
     private Timestamp update_at;
+
 }

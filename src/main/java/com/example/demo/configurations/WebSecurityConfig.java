@@ -1,19 +1,18 @@
 package com.example.demo.configurations;
 
 import com.example.demo.Model.Role;
+import com.example.demo.Utils.CustomAuthorizationManager;
 import com.example.demo.filter.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
+    private final CustomAuthorizationManager customAuthorizationManager;
 
     @Value("${api.prefix}")
     private String apiPrefix;
@@ -39,6 +39,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests
                             .anyRequest().permitAll();
+//                            .requestMatchers("/api/customers/unlock**", "/api/customers/unlock**").hasRole(Role.ROLE_ADMIN)
+//                            .requestMatchers("/api/customers/login", "/api/customers/login/**","/api/customers/register", "/api/customers/register/**").permitAll()
+//                            .anyRequest().access(customAuthorizationManager);
+
 //                            .requestMatchers(
 //                                    String.format("%s/customers/login", apiPrefix),
 //                                    String.format("%s/customers/register", apiPrefix),
