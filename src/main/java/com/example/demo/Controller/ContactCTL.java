@@ -3,6 +3,10 @@ package com.example.demo.Controller;
 import com.example.demo.Model.Contact; // Import model Contact
 import com.example.demo.Service.ContactSV; // Import service ContactSV
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -24,9 +28,23 @@ public class ContactCTL {
         return "Liên hệ đã được gửi thành công!";
     }
     // Phương thức để lấy danh sách yêu cầu liên hệ
-    @GetMapping("/contacts") // Đường dẫn API
-    public List<Contact> getAllContacts() {
-        return contactSV.getAllContacts(); // Gọi phương thức từ service
+    @GetMapping("/contacts")
+    public ResponseEntity<Map<String, Object>> getContactsByStatus(
+            @RequestParam(defaultValue = "10") int limit,  // Mặc định là 10 nếu không có tham số limit
+            @RequestParam(defaultValue = "1") int pageNum // Mặc định là trang 1 nếu không có tham số pageNumber
+    ) {
+        int status=0;
+        Pageable pageable = PageRequest.of(pageNum - 1, limit);  // Trang bắt đầu từ 0 trong Pageable
+
+        Page<Contact> contactPage = contactSV.getAllContacts(status, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contacts", contactPage.getContent());  // Dữ liệu liên hệ
+        response.put("totalItems", contactPage.getTotalElements());  // Tổng số bản ghi
+        response.put("totalPages", contactPage.getTotalPages());  // Tổng số trang
+        response.put("currentPage", pageNum);  // Trang hiện tại
+
+        return ResponseEntity.ok(response);
     }
 
     // Phương thức để gửi mail và cập nhật trạng thái của yêu cầu

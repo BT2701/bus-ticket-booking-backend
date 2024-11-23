@@ -1,6 +1,8 @@
 package com.example.demo.Repository;
 
 import com.example.demo.Model.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +27,10 @@ public interface InvoiceRepo extends JpaRepository<Booking, Integer> {
             "WHERE cu.phone = :phoneNumber " +
             "AND (bk.status IN :statuses) " + // Sử dụng IN để kiểm tra các giá trị status
             "GROUP BY c.name, s.departure, s.arrival, s.price, bk.seatnum, r.duration, f.name, t.name")
-    List<Object[]> findInvoiceByPhoneAndStatus(@Param("phoneNumber") String phoneNumber, @Param("statuses") List<String> statuses);
+    Page<Object[]> findInvoiceByPhoneAndStatus(
+            @Param("phoneNumber") String phoneNumber,
+            @Param("statuses") List<String> statuses,
+            Pageable pageable);
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, " +
             "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id, " +
@@ -43,7 +48,10 @@ public interface InvoiceRepo extends JpaRepository<Booking, Integer> {
             "AND bk.status = 2 " + // Điều kiện status = 2 (đã sử dụng)
             "AND s.arrival < CURRENT_DATE " + // Điều kiện arrival nhỏ hơn ngày hôm nay
             "GROUP BY c.name, s.departure, s.arrival, s.price, bk.seatnum, r.duration, f.name, t.name, bk.id, fb.id")
-    List<Object[]> findBookingsByCustomerIdAndStatusAndArrivalBeforeToday(@Param("customerId") int customerId);
+    Page<Object[]> findBookingsByCustomerIdAndStatusAndArrivalBeforeToday(
+            @Param("customerId") int customerId,
+            Pageable pageable
+    );
 
     // Cập nhật trạng thái vé
     @Modifying

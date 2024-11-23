@@ -3,6 +3,8 @@ package com.example.demo.Service;
 import com.example.demo.Model.Contact; // Import model Contact
 import com.example.demo.Repository.ContactRepo; // Import repository
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,8 @@ public class ContactSV {
         contactRepo.save(contact); // Lưu vào cơ sở dữ liệu
     }
     // Phương thức để lấy tất cả các liên hệ với điều kiện status = 0 và sắp xếp theo create_at từ xa đến gần
-    public List<Contact> getAllContacts() {
-        return contactRepo.findContactsByStatus(0);
+    public Page<Contact> getAllContacts(int status, Pageable pageable) {
+        return contactRepo.findContactsByStatus(status, pageable);
     }
 
     // Cập nhật trạng thái và gửi email

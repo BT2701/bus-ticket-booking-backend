@@ -21,10 +21,11 @@ public class InvoiceCTL {
     private InvoiceSV invoiceSV;
 
     @GetMapping("/lookup-invoice")
-    public ResponseEntity<List<Object[]>> lookupInvoiceByPhone(
+    public ResponseEntity<Map<String, Object>> lookupInvoiceByPhone(
             @RequestParam String phoneNumber,
-            @RequestParam(required = false) String[] status) { // Thay đổi để nhận mảng status
-
+            @RequestParam(required = false) String[] status,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
         // Khởi tạo danh sách để chứa các giá trị status
         List<String> statusList = new ArrayList<>();
 
@@ -36,26 +37,32 @@ public class InvoiceCTL {
                 } else if ("used".equalsIgnoreCase(s)) {
                     statusList.add("2"); // Thay đổi thành '2' nếu status là 'used'
                 } else {
-                    statusList.add("1"); // Thay đổi thành '1' nếu status là 'unused'
-                    statusList.add("2"); // Thay đổi thành '2' nếu status là 'used'
-                    statusList.add("3"); // Thay đổi thành '2' nếu status là 'cancel'
-
+                    statusList.add("1");
+                    statusList.add("2");
+                    statusList.add("3");
                 }
             }
         }
-
-        // Gọi service để tìm kiếm hóa đơn dựa trên số điện thoại và status
-        List<Object[]> invoices = invoiceSV.findInvoicesByPhoneNumber(phoneNumber, statusList); // Truyền cả phoneNumber và status
+        // Tính toán offset từ pageNum và limit
+        int offset = (pageNum - 1) * limit;
+        Map<String, Object> invoices = invoiceSV.findInvoicesByPhoneNumber(phoneNumber, statusList, offset, limit);
 
         // Trả về danh sách hóa đơn
         return ResponseEntity.ok(invoices);
     }
 
-    @GetMapping("/lookup-past-bookings/{customerId}") // Giữ nguyên path variable
-    public ResponseEntity<List<Object[]>> lookupPastBookings(
-            @PathVariable("customerId") int customerId) { // Sử dụng @PathVariable
-        // Gọi service để tìm các booking quá khứ của customerId
-        List<Object[]> pastBookings = invoiceSV.findPastBookingsByCustomerId(customerId);
+    @GetMapping("/lookup-past-bookings")
+    public ResponseEntity<Map<String, Object>> lookupPastBookings(
+            @RequestParam("customerId") int customerId,  // Nhận customerId từ query parameters
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum, // Sử dụng @RequestParam để nhận pageNum
+            @RequestParam(value = "limit", defaultValue = "10") int limit) { // Sử dụng @RequestParam để nhận limit
+
+        // Logic phân trang: tính toán offset dựa trên pageNum và limit
+        int offset = (pageNum - 1) * limit;
+
+        // Gọi service để tìm các booking quá khứ của customerId với phân trang
+        Map<String, Object> pastBookings = invoiceSV.findPastBookingsByCustomerId(customerId, offset, limit);
+
         // Trả về danh sách các booking quá khứ
         return ResponseEntity.ok(pastBookings);
     }
@@ -107,8 +114,4 @@ public class InvoiceCTL {
             return false; // Trả về 404 nếu không tìm thấy vé
         }
     }
-
-
-
-
 }
