@@ -45,5 +45,4 @@ public interface FeedbackRepo extends JpaRepository<Feedback, Integer> {
             "WHERE s.id = :scheduleId AND f.rating = :rating")
     long countFeedbackByScheduleIdAndRating(@Param("scheduleId") int scheduleId, @Param("rating") int rating);
 
-
 }

@@ -1,12 +1,17 @@
 package com.example.demo.Service;
 
 import com.example.demo.Repository.InvoiceRepo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional; // Import @Transactional
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.Model.Booking; // Import model Contact
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional // Đảm bảo rằng toàn bộ lớp dịch vụ chạy trong một giao dịch
@@ -17,15 +22,47 @@ public class InvoiceSV {
     private InvoiceRepo invoiceRepository;
 
     // Hàm tìm hóa đơn dựa trên số điện thoại và status
-    public List<Object[]> findInvoicesByPhoneNumber(String phoneNumber, List<String> statusList) {
-        // Gọi repository để tìm hóa đơn theo số điện thoại và status
-        return invoiceRepository.findInvoiceByPhoneAndStatus(phoneNumber, statusList);
+    public Map<String, Object> findInvoicesByPhoneNumber(String phoneNumber, List<String> statusList, int offset, int limit) {
+        // Tính toán số trang từ offset và limit
+        int page = offset / limit;
+
+        // Tạo Pageable với trang và giới hạn
+        Pageable pageable = PageRequest.of(page, limit);
+        // Gọi repository để lấy dữ liệu phân trang
+        Page<Object[]> pageResult = invoiceRepository.findInvoiceByPhoneAndStatus(phoneNumber, statusList, pageable);
+
+        // Chuẩn bị phản hồi trả về với dữ liệu và thông tin phân trang
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", pageResult.getContent()); // Dữ liệu của trang hiện tại
+        response.put("totalElements", pageResult.getTotalElements()); // Tổng số bản ghi
+        response.put("currentPage", pageResult.getNumber()); // Số trang hiện tại
+        response.put("totalPages", pageResult.getTotalPages()); // Tổng số trang
+
+        return response;
     }
 
+//    public List<Object[]> findPastBookingsByCustomerId(int customerId) {
+//        // Gọi repository để tìm các booking theo customerId và status = 2, arrival < ngày hôm nay
+//        return invoiceRepository.findBookingsByCustomerIdAndStatusAndArrivalBeforeToday(customerId);
+//    }
+
     // Hàm tìm hóa đơn dựa trên customerId, status = 2 và schedule.arrival < ngày hôm nay
-    public List<Object[]> findPastBookingsByCustomerId(int customerId) {
-        // Gọi repository để tìm các booking theo customerId và status = 2, arrival < ngày hôm nay
-        return invoiceRepository.findBookingsByCustomerIdAndStatusAndArrivalBeforeToday(customerId);
+    public Map<String, Object> findPastBookingsByCustomerId(int customerId, int offset, int limit) {
+        // Tính toán số trang từ offset và limit
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit);
+
+        // Gọi repository để lấy dữ liệu booking quá khứ của customerId với status = 2 và arrival < ngày hôm nay
+        Page<Object[]> pageResult = invoiceRepository.findBookingsByCustomerIdAndStatusAndArrivalBeforeToday(customerId, pageable);
+
+        // Chuẩn bị phản hồi trả về với dữ liệu và thông tin phân trang
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", pageResult.getContent()); // Dữ liệu booking
+        response.put("totalElements", pageResult.getTotalElements()); // Tổng số bản ghi
+        response.put("currentPage", pageResult.getNumber()); // Số trang hiện tại
+        response.put("totalPages", pageResult.getTotalPages()); // Tổng số trang
+
+        return response;
     }
 
     // Hàm hủy vé bằng cách cập nhật status
