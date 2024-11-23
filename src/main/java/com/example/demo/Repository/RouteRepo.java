@@ -24,7 +24,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     @Query("SELECT DISTINCT s.address FROM routes r JOIN r.to s")
     List<String> findUniqueToLocations();
 
-    @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, "
+    @Query("SELECT c.name as busType, s.departure, s.arrival, s, "
             + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
             + "r.duration, f.name as fromStation, t.name as toStation, s.id "
             + "FROM schedules s "
@@ -58,7 +58,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
     //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
     //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
 
-    @Query("SELECT DISTINCT c.name as busType, r.distance, r.duration, s.price, f.name as fromStation, t.name as toStation" +
+    @Query("SELECT DISTINCT c.name as busType, r.distance, r.duration, s, f.name as fromStation, t.name as toStation" +
             ", f.address, t.address "
             + "FROM schedules s "
             + "JOIN s.bus b "
