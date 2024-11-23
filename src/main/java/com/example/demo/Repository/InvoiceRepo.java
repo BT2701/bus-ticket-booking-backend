@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface InvoiceRepo extends JpaRepository<Booking, Integer> {
 
-    @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, " +
+    @Query("SELECT c.name as busType, s.departure, s.arrival, s, " +
             "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id " +
             "FROM bookings bk " +
             "JOIN bk.customer cu " +
