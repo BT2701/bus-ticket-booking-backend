@@ -41,7 +41,6 @@ public class Customer implements UserDetails {
     @JsonIgnore
     private List<Notification> notifications;
 
-
     @Column
     @JsonIgnore
     private String password;
