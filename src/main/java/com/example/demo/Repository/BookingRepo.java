@@ -18,4 +18,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     @Query("select new com.example.demo.DTO.BookingManagementDTO(b.id, b.customer.name, b.customer.phone, b.seatnum, b.time, p.id, b.schedule) " +
             "from bookings b left join payments p on b.id = p.booking.id")
     public List<BookingManagementDTO> getBookingManagement(Pageable pageable);
+
+    @Query("select b.seatnum from bookings b where b.schedule.id=:scheduleId")
+    public List<Object> getSeatBySchedule(@Param("scheduleId")int scheduleId);
 }

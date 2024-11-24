@@ -14,7 +14,7 @@ public class ScheduleSV {
     private ScheduleRepo scheduleRepo;
 
     public List<Schedule> getAllSchedules() {
-        return scheduleRepo.findAll();
+        return scheduleRepo.getAvailableSchedules();
     }
     public List<Schedule> getByBus(int busid){
         return scheduleRepo.findByBus(busid);

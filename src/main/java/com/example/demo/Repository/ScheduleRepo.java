@@ -21,4 +21,7 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Integer> {
 
     @Query("select s from schedules s")
     List<Schedule> getScheduleLimit(Pageable pageable);
+
+    @Query("select s from schedules s where s.departure >= CURRENT_TIMESTAMP")
+    List<Schedule> getAvailableSchedules();
 }

@@ -2,6 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.DTO.BookingDTO;
 import com.example.demo.DTO.BookingManagementDTO;
+import com.example.demo.Model.Customer;
 import com.example.demo.Service.BookingSV;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,4 +29,13 @@ public class BookingCTL {
     public ResponseEntity<Integer> getTotalBooking() {
         return ResponseEntity.ok(bookingSV.getTotalBooking());
     }
+    @GetMapping("/user")
+    public Customer getUser(@RequestParam String phone) {
+        return bookingSV.getCustomerByPhone(phone);
+    }
+    @GetMapping("/booked-seats")
+    public List<Object> getBookedSeats(@RequestParam int scheduleId) {
+        return bookingSV.getSeatBySchedule(scheduleId);
+    }
+
 }

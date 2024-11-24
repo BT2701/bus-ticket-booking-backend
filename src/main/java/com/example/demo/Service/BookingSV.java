@@ -68,5 +68,11 @@ public class BookingSV {
     public int getTotalBooking() {
         return bookingRepo.findAll().size();
     }
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepo.findCustomerByPhone(phone).orElse(null);
+    }
 
+    public List<Object> getSeatBySchedule(int scheduleId) {
+        return bookingRepo.getSeatBySchedule(scheduleId);
+    }
 }
