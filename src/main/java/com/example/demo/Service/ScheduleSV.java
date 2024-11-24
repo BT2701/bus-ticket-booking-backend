@@ -3,6 +3,7 @@ package com.example.demo.Service;
 import com.example.demo.Model.Schedule;
 import com.example.demo.Repository.ScheduleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,5 +27,11 @@ public class ScheduleSV {
     }
     public List<Schedule> getSchedulesByDriverId(int driverId) {
         return scheduleRepo.findByDriverId(driverId);
+    }
+    public List<Schedule> getScheduleLimit(int page, int size) {
+        return scheduleRepo.getScheduleLimit(PageRequest.of(page, size));
+    }
+    public Integer getTotalSchedule() {
+        return scheduleRepo.findAll().size();
     }
 }
