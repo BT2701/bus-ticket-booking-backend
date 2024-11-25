@@ -4,9 +4,11 @@ import com.example.demo.DTO.BookingDTO;
 import com.example.demo.DTO.BookingManagementDTO;
 import com.example.demo.Model.Booking;
 import com.example.demo.Model.Customer;
+import com.example.demo.Model.Payment;
 import com.example.demo.Model.Schedule;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.CustomerRepo;
+import com.example.demo.Repository.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,8 @@ public class BookingSV {
     private BookingRepo bookingRepo;
     @Autowired
     private CustomerRepo customerRepo;
+    @Autowired
+    private PaymentRepo paymentRepo;
 
     public Customer addCustomerForBooking(String email, String name, String phone) {
         Customer c= new Customer();
@@ -85,6 +89,17 @@ public class BookingSV {
             b.setSeatnum(booking.getSeatNum());
             b.setSchedule(booking.getSchedule());
             bookingRepo.save(b);
+        }
+    }
+    public void deleteBooking(String id) {
+        int bookingId= Integer.parseInt(id);
+        Booking b= bookingRepo.findById(bookingId).orElse(null);
+        Payment p= paymentRepo.findByBooking(bookingId);
+        if(b!=null){
+            if(p!=null){
+                paymentRepo.delete(p);
+            }
+            bookingRepo.delete(b);
         }
     }
 }
