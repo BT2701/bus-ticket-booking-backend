@@ -1,10 +1,8 @@
 package com.example.demo.Controller;
+import com.example.demo.Model.Route;
 import com.example.demo.Service.RouteSV;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,5 +15,14 @@ public class RouteCTL {
     @GetMapping("/api/most-popular-route/{numLimit}")
     public List<Object[]> getMostPopularRoute(@PathVariable("numLimit") int numLimit) {
         return routeSV.getMostPopularRoute(numLimit);
+    }
+
+    @GetMapping("api/route-management")
+    public List<Route> getRouteManagement(@RequestParam int page, @RequestParam int size) {
+        return routeSV.getRouteLimit(page, size);
+    }
+    @GetMapping("api/route/total")
+    public Integer getTotalRoute() {
+        return routeSV.getTotalRoute();
     }
 }

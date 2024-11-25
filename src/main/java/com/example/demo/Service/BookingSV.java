@@ -1,11 +1,15 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.BookingDTO;
+import com.example.demo.DTO.BookingManagementDTO;
 import com.example.demo.Model.Booking;
 import com.example.demo.Model.Customer;
 import com.example.demo.Model.Schedule;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.CustomerRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -58,5 +62,29 @@ public class BookingSV {
             return false;
         }
     }
+    public List<BookingManagementDTO> getAllBookingManagement(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return bookingRepo.getBookingManagement(pageable);
+    }
+    public int getTotalBooking() {
+        return bookingRepo.findAll().size();
+    }
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepo.findCustomerByPhone(phone).orElse(null);
+    }
 
+    public List<Object> getSeatBySchedule(int scheduleId) {
+        return bookingRepo.getSeatBySchedule(scheduleId);
+    }
+    public void updateBookingStatus(String id, BookingManagementDTO booking) {
+        int bookingId= Integer.parseInt(id);
+        Booking b= bookingRepo.findById(bookingId).orElse(null);
+        if(b!=null){
+            Customer c = addCustomerForBooking(booking.getEmail(), booking.getCustomerName(), booking.getPhone());
+            b.setCustomer(c);
+            b.setSeatnum(booking.getSeatNum());
+            b.setSchedule(booking.getSchedule());
+            bookingRepo.save(b);
+        }
+    }
 }

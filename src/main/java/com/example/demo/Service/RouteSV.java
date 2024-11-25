@@ -62,4 +62,11 @@ public class RouteSV {
         return results.isEmpty() ? null : results; // Return the top result or null if not found
     }
 
+    public List<Route> getRouteLimit(int page, int size) {
+        return routeRepo.getRouteLimit(PageRequest.of(page, size));
+    }
+    public Integer getTotalRoute() {
+        return routeRepo.findAll().size();
+    }
+
 }

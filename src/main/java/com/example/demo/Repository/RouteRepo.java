@@ -80,4 +80,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "ORDER BY quantityTicket DESC")
     List<Object[]> findMostPopularRoute(Pageable pageable);
 
+    @Query("SELECT r FROM routes r")
+    List<Route> getRouteLimit(Pageable pageable);
+
 }
