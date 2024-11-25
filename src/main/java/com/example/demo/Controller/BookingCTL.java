@@ -37,5 +37,10 @@ public class BookingCTL {
     public List<Object> getBookedSeats(@RequestParam int scheduleId) {
         return bookingSV.getSeatBySchedule(scheduleId);
     }
+    @PutMapping("/booking/{id}")
+    public ResponseEntity<String> updateBooking(@PathVariable String id, @Valid @RequestBody BookingManagementDTO bookingDTO) {
+        bookingSV.updateBookingStatus(id, bookingDTO);
+        return ResponseEntity.ok("Booking updated");
+    }
 
 }

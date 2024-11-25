@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.BookingDTO;
 import com.example.demo.DTO.BookingManagementDTO;
 import com.example.demo.Model.Booking;
 import com.example.demo.Model.Customer;
@@ -74,5 +75,16 @@ public class BookingSV {
 
     public List<Object> getSeatBySchedule(int scheduleId) {
         return bookingRepo.getSeatBySchedule(scheduleId);
+    }
+    public void updateBookingStatus(String id, BookingManagementDTO booking) {
+        int bookingId= Integer.parseInt(id);
+        Booking b= bookingRepo.findById(bookingId).orElse(null);
+        if(b!=null){
+            Customer c = addCustomerForBooking(booking.getEmail(), booking.getCustomerName(), booking.getPhone());
+            b.setCustomer(c);
+            b.setSeatnum(booking.getSeatNum());
+            b.setSchedule(booking.getSchedule());
+            bookingRepo.save(b);
+        }
     }
 }
