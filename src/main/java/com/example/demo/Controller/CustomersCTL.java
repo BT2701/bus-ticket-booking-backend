@@ -5,11 +5,16 @@ import com.example.demo.Model.Customer;
 import com.example.demo.Model.Token;
 import com.example.demo.Service.CustomerService;
 import com.example.demo.Service.TokenSV;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +28,154 @@ import java.util.Map;
 public class CustomersCTL {
     private final CustomerService customerService;
     private final TokenSV tokenService;
+    private final HttpServletRequest request;
+
+    @GetMapping("/oauth2-infor")
+    public ResponseEntity<?> getUserAfterLoginWithOauth2(
+            @AuthenticationPrincipal OAuth2User principal
+    ) {
+        try {
+            if (principal == null) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                return ResponseEntity.ok(null);
+            }
+
+            Map<String, Object> attributes = principal.getAttributes();
+            String email = attributes.get("email") == null ? attributes.get("login").toString() + "@gmail.com" : attributes.get("email").toString();
+            Customer customer = customerService.getCustomerByEmail(email);
+
+            // lần đầu đăng nhập bằng oauth2
+            if(customer.getPhone() == null || customer.getPhone().isEmpty()) {
+                return ResponseEntity.ok(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.OK.value())
+                                .message("Đăng nhập thành công !")
+                                .data(customer)
+                                .build()
+                );
+            }
+
+            if(!customer.isActive()) {
+                return ResponseEntity.ok(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .message("Tài khoản của bạn đã bị khóa !")
+                                .data(customer)
+                                .build()
+                );
+            }
+
+            String token = customerService.loginByOauth2(customer.getEmail());
+            Customer customerDetails = customerService.getCustomerDetailsFromToken(token);
+            Token jwtToken = tokenService.addToken(customerDetails, token);
+
+            Oauth2ResponseCustomerDTO oauth2ResponseCustomerDTO = Oauth2ResponseCustomerDTO.builder()
+                    .email(customer.getEmail())
+                    .name(customer.getName())
+                    .phone(customer.getPhone())
+                    .birth(customer.getBirth())
+                    .id(customer.getId())
+                    .address(customer.getAddress())
+                    .accessToken(jwtToken.getAccessToken())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .build();
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.OK.value())
+                            .message("Đăng nhập thành công !")
+                            .data(oauth2ResponseCustomerDTO)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+    @PostMapping("/oauth2-logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        try {
+            // remove session
+            request.getSession().invalidate();
+
+            // remove cookie
+            Cookie cookie = new Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok("Đăng xuất thành công!");
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
+    @PutMapping("/oauth2-update-infor-on-first-login")
+    public ResponseEntity<?> updateUserOnFirstLoginWithOauth2(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestBody UpdateCustomerDTO updateCustomerDTO
+    ) {
+        try {
+            if (principal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.UNAUTHORIZED.value())
+                                .message("Lỗi đăng nhập bên thứ 3!")
+                                .build()
+                );
+            }
+
+            Map<String, Object> attributes = principal.getAttributes();
+            String email = attributes.get("email") == null ? attributes.get("login").toString() + "@gmail.com" : attributes.get("email").toString();
+
+            // Kiểm tra email trong OAuth2User có trùng với email từ client hay không
+            if (!email.equals(updateCustomerDTO.getEmail())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.FORBIDDEN.value())
+                                .message("Email không khớp, không thể cập nhật!")
+                                .build()
+                );
+            }
+
+            Customer existCustomer = customerService.getCustomerByEmail(updateCustomerDTO.getEmail());
+
+            if (existCustomer == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.NOT_FOUND.value())
+                                .message("Không tìm thấy người dùng với email : " + email +" !")
+                                .build()
+                );
+            }
+
+            Customer customer = customerService.updateCustomer(existCustomer.getId(), updateCustomerDTO);
+            String token = customerService.loginByOauth2(updateCustomerDTO.getEmail());
+            Customer customerDetails = customerService.getCustomerDetailsFromToken(token);
+            Token jwtToken = tokenService.addToken(customerDetails, token);
+
+            Oauth2ResponseCustomerDTO oauth2ResponseCustomerDTO = Oauth2ResponseCustomerDTO.builder()
+                    .email(customer.getEmail())
+                    .name(customer.getName())
+                    .phone(customer.getPhone())
+                    .birth(customer.getBirth())
+                    .id(customer.getId())
+                    .address(customer.getAddress())
+                    .accessToken(jwtToken.getAccessToken())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .build();
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.OK.value())
+                            .message("Cập nhật thông tin thành công!")
+                            .data(oauth2ResponseCustomerDTO)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
 
     @GetMapping("")
     public Page<Customer> getCustomers(
@@ -58,7 +211,7 @@ public class CustomersCTL {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.CREATED.value())
-                            .message("Đăng ký thành công!")
+                            .message("Đăng ký thành công! Hãy xác thực tài khoản tại email của bạn!")
                             .data(customer)
                             .build()
             );
@@ -94,6 +247,15 @@ public class CustomersCTL {
             );
         } catch (Exception e) {
             return CustomersCTL.handleError(e);
+        }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyAccount(@RequestParam String verifyToken) {
+        try {
+            return ResponseEntity.ok(customerService.verifyCustomer(verifyToken));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực thất bại: " + e.getMessage());
         }
     }
 

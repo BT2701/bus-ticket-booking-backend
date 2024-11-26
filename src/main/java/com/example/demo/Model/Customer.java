@@ -1,5 +1,6 @@
 package com.example.demo.Model;
 
+import com.example.demo.Repository.ProviderType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,9 @@ public class Customer implements UserDetails {
     @JsonIgnore
     private List<Notification> notifications;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ProviderType provider;
 
     @Column
     @JsonIgnore
@@ -49,6 +53,9 @@ public class Customer implements UserDetails {
     @Column
     @JsonIgnore
     private boolean isActive;
+
+    @Column(nullable = false)
+    private boolean isVerified;
 
     @OneToMany(mappedBy = "customer")
     @JsonIgnore

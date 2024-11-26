@@ -1,16 +1,12 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTO.CustomerDTO;
-import com.example.demo.DTO.ForgotPasswordDTO;
 import com.example.demo.DTO.UpdateCustomerDTO;
 import com.example.demo.Model.Customer;
 import com.example.demo.Model.ForgotPassword;
 import com.example.demo.Model.Role;
 import com.example.demo.Model.Token;
-import com.example.demo.Repository.CustomerRepo;
-import com.example.demo.Repository.ForgotPasswordRepo;
-import com.example.demo.Repository.RoleRepo;
-import com.example.demo.Repository.TokenRepo;
+import com.example.demo.Repository.*;
 import com.example.demo.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,6 +36,7 @@ public class CustomerService implements ICustomerService{
     private final JwtUtils jwtUtils;
 
     private final TokenRepo tokenRepo;
+    private final EmailService emailService;
     private final RoleRepo roleRepo;
     private final ForgotPasswordRepo forgotPasswordRepo;
 
@@ -49,6 +47,10 @@ public class CustomerService implements ICustomerService{
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         return customerRepo.findAll(pageable);
+    }
+
+    public Customer getCustomerByEmail(String email) {
+        return customerRepo.findCustomerByEmail(email).orElse(null);
     }
 
     @Override
@@ -78,12 +80,40 @@ public class CustomerService implements ICustomerService{
                 .role(role)
                 .forgotPassword(null)
                 .isActive(true)
+                .isVerified(false)
+                .provider(ProviderType.DATABASE)
                 .build();
 
         String encodePassword = passwordEncoder.encode(customerDTO.getPassword());
         newCustomer.setPassword(encodePassword);
 
-        return customerRepo.save(newCustomer);
+        customerRepo.save(newCustomer);
+        String verifyToken = jwtUtils.generateToken(newCustomer);
+        emailService.sendEmailToVerify(newCustomer, verifyToken);
+
+        return newCustomer;
+    }
+
+    @Transactional
+    public String verifyCustomer (String token) throws Exception {
+        try {
+            Token tk = tokenRepo.findByAccessToken(token);
+            if(tk == null) {
+                throw new Exception("Mã xác thực không tồn tại!");
+            }
+            if(jwtUtils.isTokenExpired(token)) {
+                tokenRepo.deleteTokenByAccessToken(token);
+                throw new DateTimeException("Mã xác thực đã hết hạn ! Bấm đăng nhập để được gửi lại mã mới !");
+            }
+
+            Customer customer = getCustomerDetailsFromToken(token);
+            customer.setVerified(true);
+            customerRepo.save(customer);
+            tokenRepo.deleteTokenByAccessToken(token);
+            return "Tài khoản đã được xác thực thành công !";
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
     }
 
     @Override
@@ -99,6 +129,20 @@ public class CustomerService implements ICustomerService{
             if(customer.isEmpty()) {
                 throw new Exception("Tài khoản không tồn tại !");
             }
+            if(!customer.get().isActive()) {
+                throw new Exception("Tài khoản đã bị khóa !");
+            }
+            if(!customer.get().isVerified()) {
+                List<Token> tokens = tokenRepo.findByCustomer(customer.get());
+                if(tokens.isEmpty()) {
+                    throw new Exception("Mã xác thực đã được gửi qua email của bạn !");
+                }
+
+                String verifyToken = jwtUtils.generateToken(customer.get());
+                String sendEmail = emailService.sendEmailToVerify(customer.get(), verifyToken);
+
+                throw new Exception(sendEmail);
+            }
 
             Customer existingCustomer = customer.get();
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -113,6 +157,25 @@ public class CustomerService implements ICustomerService{
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new Exception("Tài khoản hoặc mật khẩu không chính xác " + e.getMessage());
+        }
+    }
+
+    public String loginByOauth2(String email) throws Exception {
+        try {
+            Optional<Customer> customer = customerRepo.findCustomerByEmail(email);
+
+            if(customer.isEmpty()) {
+                throw new Exception("Tài khoản không tồn tại !");
+            }
+            if(!customer.get().isActive()) {
+                throw new Exception("Tài khoản đã bị khóa !");
+            }
+
+            Customer existingCustomer = customer.get();
+            return jwtUtils.generateToken(existingCustomer);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception("Tài khoản hoặc mật khẩu không tồn tại : " + e.getMessage());
         }
     }
 
@@ -174,7 +237,7 @@ public class CustomerService implements ICustomerService{
                 .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với id " + customerId));
 
         String phoneNumber = customerUpadtedDTO.getPhone();
-        if(!existingCustomer.getPhone().equals(phoneNumber) && customerRepo.existsByPhone(phoneNumber)) {
+        if(existingCustomer.getPhone() != null && !existingCustomer.getPhone().equals(phoneNumber) && customerRepo.existsByPhone(phoneNumber)) {
             throw new DataIntegrityViolationException("Số điện thoại đã được sử dụng !");
         }
 
