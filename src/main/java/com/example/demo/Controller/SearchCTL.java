@@ -37,11 +37,21 @@ public class SearchCTL {
 
         return ResponseEntity.ok(uniqueLocations); // Trả về danh sách địa điểm
     }
+
     @GetMapping("/get-all-routes")
-    public ResponseEntity<List<Object[]>> findAllBusRoutes() {
-        List<Object[]> routes = routeSV.findAllBusRoutes();
+    public ResponseEntity<Map<String, Object>> findAllBusRoutes(
+            @RequestParam(defaultValue = "10") int limit,  // mặc định là 10 nếu không có tham số
+            @RequestParam(defaultValue = "1") int pageNum  // mặc định là trang 1 nếu không có tham số
+    ) {
+        // Tính toán offset dựa trên pageNum và limit
+        int offset = (pageNum - 1) * limit;
+
+        // Gọi service để lấy dữ liệu phân trang và thông tin tổng số trang
+        Map<String, Object> routes = routeSV.findAllBusRoutes(limit, offset);
+
         return ResponseEntity.ok(routes);
     }
+
 
     // Endpoint cho việc tìm kiếm
     @GetMapping("/search")

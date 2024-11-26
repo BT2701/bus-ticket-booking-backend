@@ -39,4 +39,15 @@ public class ScheduleCTL {
         List<Schedule> schedules = scheduleSV.getSchedulesByDriverId(driverId);
         return ResponseEntity.ok(schedules);
     }
+
+    @GetMapping("api/schedule-management")
+    public ResponseEntity<List<Schedule>> getSchedule(@RequestParam int page, @RequestParam int size) {
+        return ResponseEntity.ok(scheduleSV.getScheduleLimit(page, size));
+    }
+
+    @GetMapping("api/schedule/total")
+    public ResponseEntity<Integer> getTotalSchedule() {
+        return ResponseEntity.ok(scheduleSV.getTotalSchedule());
+    }
+
 }

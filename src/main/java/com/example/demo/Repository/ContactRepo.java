@@ -1,12 +1,14 @@
 package com.example.demo.Repository;
+
 import com.example.demo.Model.Contact;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
+
 
 import java.security.Timestamp;
 import java.util.List;
@@ -15,7 +17,8 @@ import java.util.List;
 public interface ContactRepo extends JpaRepository<Contact, Integer> {
     // Truy vấn tùy chỉnh để lấy các contact có status = 0 và sắp xếp theo create_at
     @Query("SELECT c FROM contact_us c WHERE c.status = :status ORDER BY c.create_at ASC")
-    List<Contact> findContactsByStatus(@Param("status") int status);
+    Page<Contact> findContactsByStatus(@Param("status") int status, Pageable pageable);
+
 
     @Modifying
     @Query("UPDATE contact_us c SET c.status = 1, c.update_at = CURRENT_TIMESTAMP WHERE c.id = :id")

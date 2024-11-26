@@ -3,13 +3,16 @@ package com.example.demo.Service;
 import com.example.demo.Model.Route;
 import com.example.demo.Repository.RouteRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RouteSV {
@@ -33,14 +36,37 @@ public class RouteSV {
                 lowestPrice, highestPrice, busTypes, sortParam);
     }
 
-    public List<Object[]> findAllBusRoutes() {
-        return routeRepo.findAllBusRoutes();
+    public Map<String, Object> findAllBusRoutes(int limit, int offset) {
+        // Tính toán số trang từ offset và limit
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit);
+
+        // Gọi repository để lấy dữ liệu phân trang
+        Page<Object[]> pageResult = routeRepo.findAllBusRoutes(pageable);
+
+        // Chuẩn bị phản hồi trả về với dữ liệu và thông tin phân trang
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", pageResult.getContent()); // Dữ liệu của trang hiện tại
+        response.put("totalElements", pageResult.getTotalElements()); // Tổng số bản ghi
+        response.put("currentPage", pageResult.getNumber()); // Số trang hiện tại
+        response.put("totalPages", pageResult.getTotalPages()); // Tổng số trang
+
+        return response;
     }
+
+
 
     public List<Object[]> getMostPopularRoute(int numLimit) {
         Pageable pageable = PageRequest.of(0, numLimit);
         List<Object[]> results = routeRepo.findMostPopularRoute(pageable);
         return results.isEmpty() ? null : results; // Return the top result or null if not found
+    }
+
+    public List<Route> getRouteLimit(int page, int size) {
+        return routeRepo.getRouteLimit(PageRequest.of(page, size));
+    }
+    public Integer getTotalRoute() {
+        return routeRepo.findAll().size();
     }
 
 }

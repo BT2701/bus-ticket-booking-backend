@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import org.springframework.data.domain.Page;
+
 
 @Repository
 public interface RouteRepo extends JpaRepository<Route, Integer> {
@@ -24,8 +26,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s, "
             + "(c.seat_count - COALESCE(SUM(CASE WHEN bk.status = 1 THEN 1 ELSE 0 END), 0)) as remainingSeats, "
-
-            + "r.duration, f.name as fromStation, t.name as toStation, s.id  "
+            + "r.duration, f.name as fromStation, t.name as toStation, s.id "
             + "FROM schedules s "
             + "JOIN s.bus b "
             + "JOIN b.category c "
@@ -54,7 +55,11 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
                                             @Param("busTypes") List<String> busTypes,
                                             @Param("sortParam") String sortParam);
 
-    @Query("SELECT c.name as busType, r.distance  , r.duration, s, f.name as fromStation, t.name as toStation,f.address,t.address "
+    //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
+    //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
+
+    @Query("SELECT DISTINCT c.name as busType, r.distance, r.duration, s, f.name as fromStation, t.name as toStation" +
+            ", f.address, t.address "
             + "FROM schedules s "
             + "JOIN s.bus b "
             + "JOIN b.category c "
@@ -62,12 +67,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             + "JOIN r.from f "
             + "JOIN r.to t "
             + "ORDER BY t.address ASC")
-    List<Object[]> findAllBusRoutes();
-
-
-
-    //LEFT JOIN cho phép bạn lấy tất cả các bản ghi từ bảng bên trái (schedules trong trường hợp này), ngay cả khi không có bản ghi tương ứng trong bảng bên phải (bookings).
-    //Điều này có nghĩa là bạn sẽ nhận được tất cả các lịch trình, kể cả những lịch trình không có bất kỳ đặt chỗ nào.
+    Page<Object[]> findAllBusRoutes(Pageable pageable);//thêm chức năng phân trang
 
     @Query("SELECT r.id, r.distance, r.duration, sch, sFrom.address, sTo.address, COUNT(b.id) AS quantityTicket " +
             "FROM routes r " +
@@ -80,6 +80,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "ORDER BY quantityTicket DESC")
     List<Object[]> findMostPopularRoute(Pageable pageable);
 
-
+    @Query("SELECT r FROM routes r")
+    List<Route> getRouteLimit(Pageable pageable);
 
 }
