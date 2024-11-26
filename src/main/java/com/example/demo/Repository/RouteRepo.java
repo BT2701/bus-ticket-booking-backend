@@ -44,8 +44,8 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             + "ORDER BY "
             + "CASE WHEN :sortParam IS NULL OR :sortParam = '' OR :sortParam = 'earliestDeparture' THEN s.departure END ASC, "
             + "CASE WHEN :sortParam = 'latestDeparture' THEN s.departure END DESC, "
-            + "CASE WHEN :sortParam = 'priceAsc' THEN s.price END ASC, "
-            + "CASE WHEN :sortParam = 'priceDesc' THEN s.price END DESC")
+            + "CASE WHEN :sortParam = 'priceAsc' THEN c.price END ASC, "
+            + "CASE WHEN :sortParam = 'priceDesc' THEN c.price END DESC")
     List<Object[]> findSchedulesWithDetails(@Param("fromAddress") String fromAddress,
                                             @Param("toAddress") String toAddress,
                                             @Param("departureDate") LocalDate departureDate,
