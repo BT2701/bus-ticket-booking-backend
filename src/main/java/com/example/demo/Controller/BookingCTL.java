@@ -42,5 +42,10 @@ public class BookingCTL {
         bookingSV.updateBookingStatus(id, bookingDTO);
         return ResponseEntity.ok("Booking updated");
     }
+    @DeleteMapping("/booking/{id}")
+    public ResponseEntity<String> deleteBooking(@PathVariable String id) {
+        bookingSV.deleteBooking(id);
+        return ResponseEntity.ok("Booking deleted");
+    }
 
 }
