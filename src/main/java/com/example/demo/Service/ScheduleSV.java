@@ -34,4 +34,13 @@ public class ScheduleSV {
     public Integer getTotalSchedule() {
         return scheduleRepo.findAll().size();
     }
+    public void addSchedule(Schedule schedule) {
+        scheduleRepo.save(schedule);
+    }
+    public void updateSchedule(Schedule schedule) {
+        scheduleRepo.save(schedule);
+    }
+    public void deleteSchedule(int id) {
+        scheduleRepo.deleteById(id);
+    }
 }

@@ -3,6 +3,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Model.Schedule;
 import com.example.demo.Service.ScheduleSV;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,4 +51,21 @@ public class ScheduleCTL {
         return ResponseEntity.ok(scheduleSV.getTotalSchedule());
     }
 
+    @PostMapping("api/schedule")
+    public ResponseEntity<String> addSchedule(@Valid @RequestBody Schedule schedule) {
+        scheduleSV.addSchedule(schedule);
+        return ResponseEntity.ok("Schedule added");
+    }
+
+    @PutMapping("api/schedule")
+    public ResponseEntity<String> updateSchedule(@Valid @RequestBody Schedule schedule) {
+        scheduleSV.updateSchedule(schedule);
+        return ResponseEntity.ok("Schedule updated");
+    }
+
+    @DeleteMapping("api/schedule/{id}")
+    public ResponseEntity<String> deleteSchedule(@PathVariable int id) {
+        scheduleSV.deleteSchedule(id);
+        return ResponseEntity.ok("Schedule deleted");
+    }
 }
