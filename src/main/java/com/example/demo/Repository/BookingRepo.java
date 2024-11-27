@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
     @Query("select b from bookings b where b.schedule.id=:scheduleId")
-    public Booking findBySchedule(@Param("scheduleId")int scheduleId);
+    public List<Booking> findBySchedule(@Param("scheduleId")int scheduleId);
 
     @Query("select new com.example.demo.DTO.BookingManagementDTO(b.id, b.customer.name, b.customer.phone, b.customer.email, b.seatnum, b.time, p.id, b.schedule) " +
             "from bookings b left join payments p on b.id = p.booking.id")
