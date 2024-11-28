@@ -50,7 +50,6 @@ public class WebSecurityConfig {
                                     String.format("%s/customers/verify", apiPrefix),
                                     String.format("%s/customers/oauth2-infor", apiPrefix),
                                     String.format("%s/customers/oauth2-logout", apiPrefix),
-                                    String.format("%s/customers/oauth2-create-password", apiPrefix),
 
                                     String.format("%s/mail/sendEmailToForgotPassword", apiPrefix),
 
@@ -70,15 +69,18 @@ public class WebSecurityConfig {
                                     String.format("%s/feedback/count/**", apiPrefix),
                                     String.format("%s/get-all-routes**", apiPrefix),
                                     String.format("%s/get-from-to", apiPrefix),
-                                    String.format("%s/search'", apiPrefix),
+                                    String.format("%s/search**", apiPrefix),
                                     String.format("%s/lookup-invoice", apiPrefix),
                                     String.format("%s/cancel-ticket/**", apiPrefix),
                                     String.format("%s/contact", apiPrefix),
-                                    String.format("%s/routes/popular/**", apiPrefix)
+                                    String.format("%s/routes/popular/**", apiPrefix),
+                                    String.format("%s/vnpay/submitOrder**", apiPrefix),
+                                    String.format("%s/vnpay/payment**", apiPrefix)
                             ).permitAll()
 
                             // customer
                             .requestMatchers("POST", String.format("%s/customers/refreshToken", apiPrefix)).authenticated()
+                            .requestMatchers("POST", String.format("%s/customers/oauth2-create-password", apiPrefix)).authenticated() //bug
                             .requestMatchers("PUT", String.format("%s/customers/updatePassword", apiPrefix)).authenticated()
 //                            .requestMatchers("POST", String.format("%s/customers/oauth2-logout", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).authenticated()
@@ -128,15 +130,15 @@ public class WebSecurityConfig {
                             .requestMatchers("GET", String.format("%s/schedules**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("POST", String.format("%s/booking**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("PUT", String.format("%s/booking/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-                            .requestMatchers("GET", String.format("%s/booking/total", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("GET", String.format("%s/booking/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/booking-management**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("DELETE", String.format("%s/booking/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("POST", String.format("%s/payment**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/busesLimit**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/route-management**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("POST", String.format("%s/schedule**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-                            .requestMatchers("GET", String.format("%s/route/total", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-                            .requestMatchers("GET", String.format("%s/schedule/total", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("GET", String.format("%s/route/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("GET", String.format("%s/schedule/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/schedule-management**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
 
                             .requestMatchers("GET", String.format("%s/statistic/tinhtrangve", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)

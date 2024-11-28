@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "${frontend.url}", allowCredentials = "true")
+//@CrossOrigin(origins = "${frontend.url}", allowCredentials = "true")
 public class ScheduleCTL {
     @Autowired
     private ScheduleSV scheduleSV;
