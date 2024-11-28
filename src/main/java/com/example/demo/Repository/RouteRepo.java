@@ -69,15 +69,30 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             + "ORDER BY t.address ASC")
     Page<Object[]> findAllBusRoutes(Pageable pageable);//thêm chức năng phân trang
 
-    @Query("SELECT r.id, r.distance, r.duration, sch, sFrom.address, sTo.address, COUNT(b.id) AS quantityTicket " +
-            "FROM routes r " +
-            "JOIN r.schedules sch " +
-            "JOIN sch.bookings b " +
+    //Hàm lấy thông tin tuyến xe phổ biến (dựa vào vé đã bán, chỉ tính vé đã bán đã được sử dụng status = 2 và chưa sử dụng status = 1, khôgn tính vẽ đã bị hủy status = 3)
+    @Query("SELECT r.id,r.distance, r.duration, sch ,sFrom.address, sTo.address, sFrom.name, sTo.name, COUNT(b.id) AS quantityTicket " +
+            "FROM bookings b " +
+            "JOIN b.schedule sch " +
+            "JOIN sch.route r " +
             "JOIN r.from sFrom " +
             "JOIN r.to sTo " +
-            "WHERE b.time >= CURRENT_DATE - 1 MONTH " +
-            "GROUP BY r.id, sch.id " +
+            "WHERE b.time >= :startDate AND b.status != 3" +
+            "GROUP BY r.id " +
             "ORDER BY quantityTicket DESC")
-    List<Object[]> findMostPopularRoute(Pageable pageable);
+    Page<Object[]> findMostPopularRoute(Pageable pageable,@Param("startDate") LocalDateTime startDate);
+
+
+    //Hàm lấy thông tin tuyến xe phổ biến trong khoảng ngày X1-X2
+    @Query("SELECT r.id,r.distance, r.duration, sch ,sFrom.address, sTo.address, sFrom.name, sTo.name, COUNT(b.id) AS quantityTicket " +
+            "FROM bookings b " +
+            "JOIN b.schedule sch " +
+            "JOIN sch.route r " +
+            "JOIN r.from sFrom " +
+            "JOIN r.to sTo " +
+            "WHERE b.time >= :startDate AND b.time <= :endDate AND b.status != 3" +
+            "GROUP BY r.id " +
+            "ORDER BY quantityTicket DESC")
+    List<Object[]> findMostPopularRouteXtoX(@Param("startDate") LocalDateTime startDate,
+                                            @Param("endDate") LocalDateTime endDate);
 
 }
