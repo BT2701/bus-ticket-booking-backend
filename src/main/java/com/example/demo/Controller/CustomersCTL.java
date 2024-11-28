@@ -5,6 +5,7 @@ import com.example.demo.Model.Customer;
 import com.example.demo.Model.Token;
 import com.example.demo.Service.CustomerService;
 import com.example.demo.Service.TokenSV;
+import com.example.demo.exceptions.InvalidTokenException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -91,6 +92,26 @@ public class CustomersCTL {
             return CustomersCTL.handleError(e);
         }
     }
+    @PostMapping("/oauth2-create-password")
+    public ResponseEntity<?> createPasswordForOauth2(
+            @RequestHeader("Authorization") String token,
+            @RequestBody CreatePasswordDTO createPasswordDTO
+    ) {
+        try {
+            String accessToken = token.substring(7);
+            Customer customer = customerService.getCustomerDetailsFromToken(accessToken);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.OK.value())
+                            .message(customerService.updateCustomerPasswordForOauth2(customer.getEmail(), createPasswordDTO.getPassword()))
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
     @PostMapping("/oauth2-logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         try {
@@ -349,7 +370,7 @@ public class CustomersCTL {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token, HttpServletResponse response) {
         try {
             String accessToken = token.substring(7);
             return ResponseEntity.ok(
@@ -447,6 +468,44 @@ public class CustomersCTL {
         }
     }
 
+    @PutMapping("/updateUserFromAdmin/{userId}")
+    public ResponseEntity<?> updateUserByAdmin(
+            @PathVariable Integer userId,
+            @Valid @RequestBody UpdateCustomerDTO customerUpdateDTO,
+            BindingResult result,
+            @RequestHeader("Authorization") String authorization
+    ) {
+        try {
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
+            }
+
+            String extractedToken = authorization.substring(7);
+            if (!customerService.isAdminFromToken(extractedToken)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.FORBIDDEN.value())
+                                .message("Bạn không có quyền truy cập tài nguyên này!")
+                                .data(null)
+                                .build()
+                );
+            }
+
+            Customer updatedUser = customerService.updateCustomer(userId, customerUpdateDTO);
+
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.ACCEPTED.value())
+                            .message("Cập nhật người dùng thành công!")
+                            .data(updatedUser)
+                            .build()
+            );
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
+    }
+
     @PutMapping("/lock/{id}")
     public ResponseEntity<?> lockAccount(@PathVariable int id) {
         try {
@@ -500,6 +559,16 @@ public class CustomersCTL {
     }
 
     public static ResponseEntity<?> handleError(Exception e) {
+        if (e instanceof InvalidTokenException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ResponseDTO.builder()
+                            .status(HttpStatus.UNAUTHORIZED.value())
+                            .message(e.getMessage())
+                            .data(null)
+                            .build()
+            );
+        }
+
         return ResponseEntity.badRequest().body(
                 ResponseDTO.builder()
                         .status(HttpStatus.BAD_REQUEST.value())

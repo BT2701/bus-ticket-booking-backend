@@ -1,23 +1,23 @@
 package com.example.demo.configurations;
 
 import com.example.demo.Model.Role;
-import com.example.demo.Utils.CustomAuthorizationManager;
 import com.example.demo.filter.JwtTokenFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
@@ -29,7 +29,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
-    private final CustomAuthorizationManager customAuthorizationManager;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Value("${api.prefix}")
@@ -41,44 +40,86 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> {
                     requests
-                            .anyRequest().permitAll();
-//                            .requestMatchers("/api/customers/unlock**", "/api/customers/unlock**").hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("/api/customers/login", "/api/customers/login/**","/api/customers/register", "/api/customers/register/**").permitAll()
-//                            .anyRequest().access(customAuthorizationManager);
+//                            .anyRequest().permitAll();
 
-//                            .requestMatchers(
-//                                    String.format("%s/customers/login", apiPrefix),
-//                                    String.format("%s/customers/register", apiPrefix),
-//                                    String.format("%s/customers/refreshToken", apiPrefix),
-//                                    String.format("%s/customers/forgotPassword", apiPrefix),
-//                                    String.format("%s/sendEmailToForgotPassword", apiPrefix),
-//                                    String.format("%s/buslist", apiPrefix)
-//                            ).permitAll()
-//
-//                            .requestMatchers("GET", String.format("%s/customers/details", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
-//                            .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
-//                            .requestMatchers("POST", String.format("%s/customers/logoutAll", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
-//                            .requestMatchers("PUT", String.format("%s/customers/**", apiPrefix)).hasAnyRole(Role.ROLE_USER, Role.ROLE_ADMIN)
-//
-//                            // roles
-//                            .requestMatchers("POST", String.format("%s/roles", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("GET", String.format("%s/roles**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("GET", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("PUT", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("DELETE", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//                            .requestMatchers("POST", String.format("%s/roles/assign", apiPrefix)).hasRole(Role.ROLE_ADMIN)
-//
-//                            .anyRequest().authenticated();
+                            .requestMatchers(
+                                    String.format("%s/customers/login", apiPrefix),
+                                    String.format("%s/customers/register", apiPrefix),
+                                    String.format("%s/customers/forgotPassword", apiPrefix),
+                                    String.format("%s/customers/oauth2-update-infor-on-first-login", apiPrefix),
+                                    String.format("%s/customers/verify", apiPrefix),
+                                    String.format("%s/customers/oauth2-infor", apiPrefix),
+                                    String.format("%s/customers/oauth2-logout", apiPrefix),
+                                    String.format("%s/customers/oauth2-create-password", apiPrefix),
+
+                                    String.format("%s/mail/sendEmailToForgotPassword", apiPrefix),
+
+                                    "http://localhost:8080/oauth2/authorization/google",
+                                    "http://localhost:8080/oauth2/authorization/facebook",
+                                    "http://localhost:8080/oauth2/authorization/github",
+
+                                    String.format("%s/buslist", apiPrefix),
+                                    String.format("%s/drivers/avatar/**", apiPrefix),
+                                    String.format("%s/buses/img/**", apiPrefix)
+                            ).permitAll()
+
+                            // customer
+                            .requestMatchers("POST", String.format("%s/customers/refreshToken", apiPrefix)).authenticated()
+                            .requestMatchers("PUT", String.format("%s/customers/updatePassword", apiPrefix)).authenticated()
+//                            .requestMatchers("POST", String.format("%s/customers/oauth2-logout", apiPrefix)).authenticated()
+                            .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).authenticated()
+                            .requestMatchers("POST", String.format("%s/customers/logoutAll", apiPrefix)).authenticated()
+
+                            .requestMatchers("PUT", String.format("%s/customers/lock/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/customers/unlock/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/customers/updateUserFromAdmin/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+
+                            .requestMatchers("GET", String.format("%s/customers**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("GET", String.format("%s/customers/details", apiPrefix)).hasAnyRole(Role.ROLE_CUSTOMER, Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/customers/**", apiPrefix)).hasAnyRole(Role.ROLE_CUSTOMER, Role.ROLE_STAFF, Role.ROLE_ADMIN)
+
+                            // roles
+                            .requestMatchers("GET", String.format("%s/roles**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("GET", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/roles", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("DELETE", String.format("%s/roles/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/roles/assign", apiPrefix)).hasRole(Role.ROLE_ADMIN)
+
+                            // schedules
+                            .requestMatchers("GET", String.format("%s/schedule/driver/**", apiPrefix)).authenticated()
+
+                            // buses
+                            // .requestMatchers("GET", String.format("%s/buslist**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/assignDriverToBus", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/buses", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/buses/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("DELETE", String.format("%s/buses/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+
+                            // drivers
+                            .requestMatchers("GET", String.format("%s/drivers**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/drivers**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/drivers/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/drivers/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/drivers**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+
+                            .anyRequest().authenticated();
                 })
                 .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl("http://localhost:3000/login", true)
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
-                .csrf(AbstractHttpConfigurer::disable);
-//                .exceptionHandling(
-//                        e->e
+                .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(
+                        e->e
 //                                .accessDeniedHandler((request, response, accessDeniedException)->response.setStatus(403))
-//                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-//                );
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                    response.setCharacterEncoding("UTF-8");
+                                    response.getWriter().write("Bạn không có quyền truy cập tài nguyên này!");
+                                    response.getWriter().flush();
+                                })
+                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                );
         http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
             @Override
             public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {

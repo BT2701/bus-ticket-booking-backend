@@ -8,12 +8,14 @@ import com.example.demo.Model.Driver;
 import com.example.demo.Repository.BusRepo;
 import com.example.demo.Repository.CategoryRepo;
 import com.example.demo.Repository.DriverRepo;
+import com.example.demo.Repository.ScheduleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,8 @@ public class BusSV {
     private CategoryRepo categoryRepo;
     @Autowired
     private DriverRepo driverRepo;
+    @Autowired
+    private ScheduleRepo scheduleRepo;
     @Autowired
     private FileSV fileSV;
 
@@ -103,12 +107,17 @@ public class BusSV {
 
         return busRepo.save(bus);
     }
-    public boolean deleteBusById(int id) {
-        Bus bus = busRepo.findById(id).orElse(null);
-        if (bus!= null) {
-            busRepo.delete(bus);
-            return true;
+
+    @Transactional
+    public void deleteBusById(int id) {
+        try {
+            Bus bus = busRepo.findById(id).orElse(null);
+            if (bus!= null) {
+                scheduleRepo.deleteByBusId(id);
+                busRepo.delete(bus);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa xe với ID: " + id + " vì : " + e.getMessage());
         }
-        return false;
     }
 }

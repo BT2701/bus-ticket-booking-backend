@@ -42,14 +42,23 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             final String authHeader = request.getHeader("Authorization");
             if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn không có quyền truy cập tài nguyên này!");
                 return;
             }
 
             final String token = authHeader.substring(7); // cắt bỏ "Bearer "
             final String phoneNumber = jwtTokenUtils.extractPhoneNumber(token);
-            if(phoneNumber != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            if(phoneNumber != null ) { // && SecurityContextHolder.getContext().getAuthentication() == null
                 Customer userDetails = (Customer) userDetailsService.loadUserByUsername(phoneNumber);
+
+                if (!userDetails.isActive()) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("Tài khoản đã bị khóa!");
+                    response.getWriter().flush();
+                    return;
+                }
 
                 if(jwtTokenUtils.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken =
@@ -64,23 +73,37 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            response.setCharacterEncoding("UTF-8");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn không có quyền truy cập tài nguyên này!");
         }
     }
 
     private boolean isBypassToken(@NotNull HttpServletRequest request) {
         final List<Pair<String, String>> bypassTokens = Arrays.asList(
                 // cho tất cả request
-                Pair.of("/", "GET"),
-                Pair.of("/", "POST"),
-                Pair.of("/", "PUT"),
-                Pair.of("/", "DELETE")
-//                Pair.of(String.format("%s/buslist", apiPrefix), "GET"),
-//                Pair.of(String.format("%s/sendEmailToForgotPassword", apiPrefix), "GET"),
-//                Pair.of(String.format("%s/customers/register", apiPrefix), "POST"),
-//                Pair.of(String.format("%s/customers/login", apiPrefix), "POST"),
-//                Pair.of(String.format("%s/customers/refreshToken", apiPrefix), "POST"),
-//                Pair.of(String.format("%s/customers/forgotPassword", apiPrefix), "POST")
+//                Pair.of("/", "GET"),
+//                Pair.of("/", "POST"),
+//                Pair.of("/", "PUT"),
+//                Pair.of("/", "DELETE")
+
+                Pair.of(String.format("%s/buslist", apiPrefix), "GET"),
+
+                Pair.of(String.format("%s/customers/register", apiPrefix), "POST"),
+                Pair.of(String.format("%s/customers/login", apiPrefix), "POST"),
+                Pair.of(String.format("%s/customers/oauth2-logout", apiPrefix), "POST"),
+                Pair.of(String.format("%s/customers/forgotPassword", apiPrefix), "POST"),
+                Pair.of(String.format("%s/mail/sendEmailToForgotPassword", apiPrefix), "POST"),
+                Pair.of(String.format("%s/customers/oauth2-create-password", apiPrefix), "POST"),
+
+                Pair.of(String.format("%s/customers/verify", apiPrefix), "GET"),
+                Pair.of(String.format("%s/customers/oauth2-infor", apiPrefix), "GET"),
+                Pair.of(String.format("%s/customers/oauth2-update-infor-on-first-login", apiPrefix), "PUT"),
+                Pair.of("http://localhost:8080/oauth2/authorization/google", "GET"),
+                Pair.of("http://localhost:8080/oauth2/authorization/facebook", "GET"),
+                Pair.of("http://localhost:8080/oauth2/authorization/github", "GET"),
+
+                Pair.of(String.format("%s/drivers/avatar", apiPrefix), "GET"),
+                Pair.of(String.format("%s/buses/img", apiPrefix), "GET")
         );
 
         for(Pair<String, String> bypassToken : bypassTokens) {

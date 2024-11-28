@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTO.CustomerDTO;
+import com.example.demo.DTO.ResponseDTO;
 import com.example.demo.DTO.UpdateCustomerDTO;
 import com.example.demo.Model.Customer;
 import com.example.demo.Model.ForgotPassword;
@@ -8,12 +9,15 @@ import com.example.demo.Model.Role;
 import com.example.demo.Model.Token;
 import com.example.demo.Repository.*;
 import com.example.demo.Utils.JwtUtils;
+import com.example.demo.exceptions.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,6 +118,29 @@ public class CustomerService implements ICustomerService{
             throw new Exception(e);
         }
     }
+    public String updateCustomerPasswordForOauth2(String email, String newPassword) throws Exception {
+        try {
+            Optional<Customer> existingCustomer = customerRepo.findCustomerByEmail(email);
+
+            if(existingCustomer.isEmpty()) {
+                throw new Exception("Tài khoản không tồn tại!");
+            }
+            if (existingCustomer.get().getPassword() != null && !existingCustomer.get().getPassword().isEmpty()) {
+                throw new Exception("Tài khoản này đã có mật khẩu!");
+            }
+
+            String encodeNewPassword = passwordEncoder.encode(newPassword);
+            existingCustomer.get().setPassword(encodeNewPassword);
+
+            customerRepo.save(existingCustomer.get());
+            return "Mật khẩu đã được thêm thành công !";
+        } catch (BadCredentialsException e) {
+            throw new Exception("Mật khẩu cũ không chính xác !");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception("Không thể thay đổi mật khẩu !");
+        }
+    }
 
     @Override
     public String login(String emailOrPhone, String password) throws Exception {
@@ -156,7 +182,8 @@ public class CustomerService implements ICustomerService{
             throw new Exception ("Mật khẩu không chính xác !");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new Exception("Tài khoản hoặc mật khẩu không chính xác " + e.getMessage());
+//            throw new Exception("Tài khoản hoặc mật khẩu không chính xác " + e.getMessage());
+            throw new Exception("Không thể đăng nhập vì : " + e.getMessage());
         }
     }
 
@@ -204,31 +231,52 @@ public class CustomerService implements ICustomerService{
     public Customer getCustomerDetailsFromToken(String token) throws Exception {
         try {
             if(jwtUtils.isTokenExpired(token)) {
-                throw new DateTimeException("Token đã hết hạn !");
+                throw new InvalidTokenException("Token đã hết hạn !");
             }
 
             String phoneNumber = jwtUtils.extractPhoneNumber(token);
 
-            return customerRepo
-                    .findCustomerByPhone(phoneNumber)
-                    .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số điện thoại : " + phoneNumber));
+            Optional<Customer> customerOpt = customerRepo.findCustomerByPhone(phoneNumber);
+            if (customerOpt.isPresent()) {
+                return customerOpt.get();
+            } else {
+                throw new InvalidTokenException("Không thể tìm thấy người dùng với số điện thoại : " + phoneNumber);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new Exception("Token không đúng hoặc không tồn tại!");
+            throw new InvalidTokenException("Token không tồn tại hoặc đã hết hạn!");
         }
     }
 
     @Override
     public Customer getCustomerDetailsFromRefreshToken(String refreshToken) throws Exception {
-        Token token = tokenRepo.findByRefreshToken(refreshToken);
+        try {
+            Token token = tokenRepo.findByRefreshToken(refreshToken);
 
-        if(token.getRefreshExpirationDate().isBefore(LocalDateTime.now())) {
-            throw new DateTimeException("Refresh token đã hết hạn !");
+            if (token == null) {
+                throw new InvalidTokenException("Refresh token không tồn tại!");
+            }
+
+            if (token.getRefreshExpirationDate().isBefore(LocalDateTime.now())) {
+                throw new InvalidTokenException("Refresh token đã hết hạn!");
+            }
+
+            return customerRepo
+                    .findCustomerByPhone(token.getCustomer().getPhone())
+                    .orElseThrow(() -> new InvalidTokenException("Không thể tìm thấy người dùng với số điện thoại : " + token.getCustomer().getPhone()));
+        }  catch (Exception e) {
+            throw new InvalidTokenException("Lỗi không xác định khi xử lý refresh token!");
         }
+    }
 
-        return customerRepo
-                .findCustomerByPhone(token.getCustomer().getPhone())
-                .orElseThrow(() -> new Exception("Không thể tìm thấy người dùng với số điện thoại : " + token.getCustomer().getPhone()));
+    public boolean isAdminFromToken(String token) throws Exception {
+        try {
+            Customer customer = getCustomerDetailsFromToken(token);
+
+            return customer.getRole().getName().equals(Role.ROLE_ADMIN);
+        } catch (Exception e) {
+            throw new InvalidTokenException("Bạn không phải là quản trị viên!");
+        }
     }
 
     @Override
