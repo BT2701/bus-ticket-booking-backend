@@ -18,14 +18,16 @@ public class BookingManagementDTO {
     private Integer bookingId;
     private String customerName;
     private String phone;
+    private String email;
     private String seatNum;
     private String time;
     private Integer payment;
     private Schedule schedule;
-    public BookingManagementDTO(Integer bookingId, String customerName, String phone, String seatNum, Timestamp time, Integer payment, Schedule schedule) {
+    public BookingManagementDTO(Integer bookingId, String customerName, String phone, String email, String seatNum, Timestamp time, Integer payment, Schedule schedule) {
         this.bookingId = bookingId;
         this.customerName = customerName;
         this.phone = phone;
+        this.email = email;
         this.seatNum = seatNum;
         this.time = time.toString();
         this.payment = payment;

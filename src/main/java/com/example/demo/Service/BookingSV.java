@@ -1,11 +1,12 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.BookingDTO;
 import com.example.demo.DTO.BookingManagementDTO;
-import com.example.demo.Model.Booking;
-import com.example.demo.Model.Customer;
-import com.example.demo.Model.Schedule;
+import com.example.demo.Model.*;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.CustomerRepo;
+import com.example.demo.Repository.EwalletRepo;
+import com.example.demo.Repository.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,10 @@ public class BookingSV {
     private BookingRepo bookingRepo;
     @Autowired
     private CustomerRepo customerRepo;
+    @Autowired
+    private PaymentRepo paymentRepo;
+    @Autowired
+    private EwalletRepo ewalletRepo;
 
     public Customer addCustomerForBooking(String email, String name, String phone) {
         Customer c= new Customer();
@@ -68,5 +73,37 @@ public class BookingSV {
     public int getTotalBooking() {
         return bookingRepo.findAll().size();
     }
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepo.findCustomerByPhone(phone).orElse(null);
+    }
 
+    public List<Object> getSeatBySchedule(int scheduleId) {
+        return bookingRepo.getSeatBySchedule(scheduleId);
+    }
+    public void updateBookingStatus(String id, BookingManagementDTO booking) {
+        int bookingId= Integer.parseInt(id);
+        Booking b= bookingRepo.findById(bookingId).orElse(null);
+        if(b!=null){
+            Customer c = addCustomerForBooking(booking.getEmail(), booking.getCustomerName(), booking.getPhone());
+            b.setCustomer(c);
+            b.setSeatnum(booking.getSeatNum());
+            b.setSchedule(booking.getSchedule());
+            bookingRepo.save(b);
+        }
+    }
+    public void deleteBooking(String id) {
+        int bookingId= Integer.parseInt(id);
+        Booking b= bookingRepo.findById(bookingId).orElse(null);
+        Payment p= paymentRepo.findByBooking(bookingId);
+        if(b!=null){
+            if(p!=null){
+                Ewalletpay e= ewalletRepo.findByPayment(p.getId());
+                if (e!=null) {
+                    ewalletRepo.delete(e);
+                }
+                paymentRepo.delete(p);
+            }
+            bookingRepo.delete(b);
+        }
+    }
 }

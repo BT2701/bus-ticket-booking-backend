@@ -107,4 +107,12 @@ public class RouteSV {
             return null;
         }
     }
+
+    public List<Route> getRouteLimit(int page, int size) {
+        return routeRepo.getRouteLimit(PageRequest.of(page, size));
+    }
+    public Integer getTotalRoute() {
+        return routeRepo.findAll().size();
+    }
+
 }

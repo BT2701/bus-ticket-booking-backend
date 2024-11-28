@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.Model.Route;
+import com.example.demo.Service.RouteSV;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import javax.print.attribute.standard.JobKOctets;
 import java.sql.Time;
@@ -53,5 +57,14 @@ public class RouteCTL {
 
         // Return ResponseEntity with the map
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("api/route-management")
+    public List<Route> getRouteManagement(@RequestParam int page, @RequestParam int size) {
+        return routeSV.getRouteLimit(page, size);
+    }
+    @GetMapping("api/route/total")
+    public Integer getTotalRoute() {
+        return routeSV.getTotalRoute();
     }
 }

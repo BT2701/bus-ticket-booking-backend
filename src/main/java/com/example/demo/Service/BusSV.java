@@ -111,4 +111,7 @@ public class BusSV {
         }
         return false;
     }
+    public List<Bus> getBusLimit(int page, int size) {
+        return busRepo.getAllBuses(PageRequest.of(page, size));
+    }
 }

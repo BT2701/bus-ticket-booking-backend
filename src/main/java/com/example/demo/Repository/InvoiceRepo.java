@@ -14,9 +14,10 @@ import java.util.List;
 @Repository
 public interface InvoiceRepo extends JpaRepository<Booking, Integer> {
 
-    @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, " +
-            "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id " +
+    @Query("SELECT c.name as busType, s.departure, s.arrival, s, " +
+            "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id,p.id " +
             "FROM bookings bk " +
+            "LEFT JOIN bk.payment p " + // Thêm LEFT JOIN với bảng payment
             "JOIN bk.customer cu " +
             "JOIN bk.schedule s " +
             "JOIN s.bus b " +
@@ -63,8 +64,9 @@ public interface InvoiceRepo extends JpaRepository<Booking, Integer> {
     Integer findStatusByTicketId(@Param("id") int id);
 
     @Query("SELECT c.name as busType, s.departure, s.arrival, s.price, " +
-            "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id " +
+            "bk.seatnum, r.duration, f.name as fromStation, t.name as toStation, bk.status, bk.id,p.id "  +
             "FROM bookings bk " +
+            "LEFT JOIN bk.payment p " + // Thêm LEFT JOIN với bảng payment
             "JOIN bk.customer cu " +
             "JOIN bk.schedule s " +
             "JOIN s.bus b " +
