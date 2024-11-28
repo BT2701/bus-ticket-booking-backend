@@ -81,4 +81,9 @@ public class BusCTL {
             return CustomersCTL.handleError(e);
         }
     }
+
+    @GetMapping("/api/busesLimit")
+    public ResponseEntity<?> getBusLimit(@RequestParam int page, @RequestParam int size) {
+        return ResponseEntity.ok(busSV.getBusLimit(page, size));
+    }
 }

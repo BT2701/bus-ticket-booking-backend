@@ -120,4 +120,7 @@ public class BusSV {
             throw new RuntimeException("Không thể xóa xe với ID: " + id + " vì : " + e.getMessage());
         }
     }
+    public List<Bus> getBusLimit(int page, int size) {
+        return busRepo.getAllBuses(PageRequest.of(page, size));
+    }
 }

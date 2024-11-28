@@ -5,6 +5,7 @@ import com.example.demo.Model.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,4 +13,7 @@ import java.util.List;
 @Repository
 public interface BusRepo extends JpaRepository<Bus, Integer> {
     Page<Bus> findAll(Pageable pageable);
+
+    @Query("select b from buses b")
+    List<Bus> getAllBuses(Pageable pageable);
 }

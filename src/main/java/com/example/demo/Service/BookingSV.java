@@ -2,12 +2,10 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.BookingDTO;
 import com.example.demo.DTO.BookingManagementDTO;
-import com.example.demo.Model.Booking;
-import com.example.demo.Model.Customer;
-import com.example.demo.Model.Payment;
-import com.example.demo.Model.Schedule;
+import com.example.demo.Model.*;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.CustomerRepo;
+import com.example.demo.Repository.EwalletRepo;
 import com.example.demo.Repository.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +24,8 @@ public class BookingSV {
     private CustomerRepo customerRepo;
     @Autowired
     private PaymentRepo paymentRepo;
+    @Autowired
+    private EwalletRepo ewalletRepo;
 
     public Customer addCustomerForBooking(String email, String name, String phone) {
         Customer c= new Customer();
@@ -97,6 +97,10 @@ public class BookingSV {
         Payment p= paymentRepo.findByBooking(bookingId);
         if(b!=null){
             if(p!=null){
+                Ewalletpay e= ewalletRepo.findByPayment(p.getId());
+                if (e!=null) {
+                    ewalletRepo.delete(e);
+                }
                 paymentRepo.delete(p);
             }
             bookingRepo.delete(b);
