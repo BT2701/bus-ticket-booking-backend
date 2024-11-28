@@ -1,11 +1,10 @@
 package com.example.demo.Model;
 
+import com.example.demo.Repository.ProviderType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity(name = "customers")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,12 +42,24 @@ public class Customer implements UserDetails {
     private List<Notification> notifications;
 
     @Column
+    @Enumerated(EnumType.STRING)
+    private ProviderType provider;
+
+    @Transient
+    @JsonProperty("isPasswordNull")
+    public boolean isPasswordNull() {
+        return this.password == null;
+    }
+
+    @Column
     @JsonIgnore
     private String password;
 
     @Column
-    @JsonIgnore
     private boolean isActive;
+
+    @Column(nullable = false)
+    private boolean isVerified;
 
     @OneToMany(mappedBy = "customer")
     @JsonIgnore

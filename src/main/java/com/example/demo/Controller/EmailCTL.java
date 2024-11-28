@@ -22,13 +22,13 @@ import java.util.List;
 public class EmailCTL {
     private final EmailService emailService;
 
-    @GetMapping("/sendEmailToForgotPassword")
+    @PostMapping("/sendEmailToForgotPassword")
     public ResponseEntity<?> sendEmail(@RequestParam String email) {
         try {
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .status(HttpStatus.ACCEPTED.value())
-                            .message("Sending email successfully")
+                            .message("Gửi email thành công!")
                             .data(emailService.sendEmailToForgotPassword(email))
                             .build()
             );
@@ -36,7 +36,7 @@ public class EmailCTL {
             return ResponseEntity.badRequest().body(
                     ResponseDTO.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
-                            .message("Sending email was failure : " + e.getMessage())
+                            .message(e.getMessage())
                             .data(null)
                             .build()
             );

@@ -25,6 +25,9 @@ public class TokenSV implements ITokenService{
     @Value("${application.security.jwt.token-validity}")
     private Long accessTokenExpire;
 
+    @Value("${application.security.jwt.verify-token-validity}")
+    private Long verifyTokenExpire;
+
     @Value("${application.security.jwt.refresh-token-validity}")
     private Long refreshTokenExpire;
 
@@ -59,7 +62,6 @@ public class TokenSV implements ITokenService{
                 tokenRepo.delete(tokenToDelete);
             }
             LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(accessTokenExpire);
-
             Token newToken = Token.builder()
                     .customer(customer)
                     .accessToken(token)
@@ -99,6 +101,27 @@ public class TokenSV implements ITokenService{
             return jwtToken;
         } catch (Exception e) {
             throw new Exception("Làm mới token thất bại !");
+        }
+    }
+
+    @Transactional
+    public Token addTokenToVerify(Customer customer, String token) {
+        try {
+            LocalDateTime expirationDateTime = LocalDateTime.now().plusSeconds(verifyTokenExpire);
+            Token newToken = Token.builder()
+                    .customer(customer)
+                    .accessToken(token)
+                    .isAccessExpired(false)
+                    .accessExpirationDate(expirationDateTime)
+                    .build();
+
+            newToken.setRefreshToken(UUID.randomUUID().toString());
+            newToken.setRefreshExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpire));
+            tokenRepo.save(newToken);
+
+            return newToken;
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
     }
 }

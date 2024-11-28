@@ -12,7 +12,8 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Integer> {
     @Query("select s from schedules s where s.bus.id = :bus ")
     List<Schedule> findByBus(@Param("bus") int busId);
 
-    //    @Query("SELECT s FROM schedules s WHERE s.bus.driver.id = :driverId")
+    void deleteByBusId(Integer busId);
+
     @Query("SELECT s FROM schedules s WHERE s.bus.driver.id = :driverId AND s.departure >= CURRENT_TIMESTAMP")
     List<Schedule> findByDriverId(@Param("driverId") int driverId);
 
