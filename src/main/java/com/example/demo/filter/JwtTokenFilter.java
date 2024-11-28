@@ -103,7 +103,21 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of("http://localhost:8080/oauth2/authorization/github", "GET"),
 
                 Pair.of(String.format("%s/drivers/avatar", apiPrefix), "GET"),
-                Pair.of(String.format("%s/buses/img", apiPrefix), "GET")
+                Pair.of(String.format("%s/buses/img", apiPrefix), "GET"),
+
+                // bổ sung thêm các API còn lại
+                Pair.of(String.format("%s/booking", apiPrefix), "POST"),
+                Pair.of(String.format("%s/schedule", apiPrefix), "GET"),
+                Pair.of(String.format("%s/feedback", apiPrefix), "GET"),
+                Pair.of(String.format("%s/feedback/average", apiPrefix), "GET"),
+                Pair.of(String.format("%s/feedback/count", apiPrefix), "GET"),
+                Pair.of(String.format("%s/get-all-routes", apiPrefix), "GET"),
+                Pair.of(String.format("%s/get-from-to", apiPrefix), "GET"),
+                Pair.of(String.format("%s/search", apiPrefix), "GET"),
+                Pair.of(String.format("%s/lookup-invoice", apiPrefix), "GET"),
+                Pair.of(String.format("%s/cancel-ticket", apiPrefix), "POST"),
+                Pair.of(String.format("%s/contact", apiPrefix), "POST"),
+                Pair.of(String.format("%s/routes/popular", apiPrefix), "GET")
         );
 
         for(Pair<String, String> bypassToken : bypassTokens) {

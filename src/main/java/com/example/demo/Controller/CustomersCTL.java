@@ -95,9 +95,15 @@ public class CustomersCTL {
     @PostMapping("/oauth2-create-password")
     public ResponseEntity<?> createPasswordForOauth2(
             @RequestHeader("Authorization") String token,
-            @RequestBody CreatePasswordDTO createPasswordDTO
+            BindingResult result,
+            @Valid @RequestBody CreatePasswordDTO createPasswordDTO
     ) {
         try {
+            ResponseEntity<ResponseDTO> errorResponse = CustomersCTL.handleValidationErrors(result);
+            if (errorResponse != null) {
+                return errorResponse;
+            }
+
             String accessToken = token.substring(7);
             Customer customer = customerService.getCustomerDetailsFromToken(accessToken);
 
