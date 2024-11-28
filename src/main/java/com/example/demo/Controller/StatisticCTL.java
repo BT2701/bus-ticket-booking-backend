@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,17 +43,7 @@ public class StatisticCTL {
         return statisticSV.doanhThuTheoThang(numberTime);
     }
 
-
-//    @GetMapping("/api/statistic/doanhthuhethong/donhthutheotuan/{numberTime}")
-//    public List<Object[]> doanhThuTheoTuan(@PathVariable int numberTime)
-//    {
-//        return statisticSV.doanhThuTheoTuan(numberTime);
-//    }
-
-
-
     //Phần doanh thu theo tuyến xe
-
     //1: Doanh thu theo ngày và tuyến xe
     @GetMapping("/api/statistic/doanhthutheotuyen/doanhthutheongay/{numberTime}")
     public List<Object[]> doanhThuTheoNgayVaTuyenXe(@PathVariable int numberTime)
@@ -83,7 +74,11 @@ public class StatisticCTL {
         LocalDateTime startDate = LocalDate.parse(timeStart, formatter).atStartOfDay();
         LocalDateTime endDate = LocalDate.parse(timeEnd, formatter).atTime(23, 59, 59); // Đặt endDate là cuối ngày
         System.out.print("dddd"+startDate);
-        List<Object[]> routePopularDTOS =  statisticSV.getMostPopularRouteXtoXAdmin(startDate,endDate);
+        List<Object[]> routePopularDTOS =  statisticSV.getMostPopularRouteDate1toDate2Admin(startDate,endDate);
+        //check xemm routePopularDTOS co null hay khong? nếu trả về giá trị null sẽ bị lỗi 401
+        if (routePopularDTOS == null || routePopularDTOS.isEmpty()) {
+            return Collections.emptyList();  // Trả về danh sách rỗng
+        }
         return routePopularDTOS.stream()
                 .map(objects -> {
                     // Ánh xạ từng phần tử trong Object[] vào RoutePopularDTO

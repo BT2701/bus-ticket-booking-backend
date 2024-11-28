@@ -9,12 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Model.Route;
-import com.example.demo.Service.RouteSV;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.print.attribute.standard.JobKOctets;
 import java.sql.Time;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +26,15 @@ public class RouteCTL {
     public ResponseEntity<Map<String, Object>> getMostPopularRoute(@PathVariable("numberRouteRequire") int numberRouteRequire, @PathVariable("currentPage") int currentPage) {
         // Lấy dữ liệu từ hàm service
         Map<String, Object> routePopularDTOS = routeSV.getMostPopularRoute(currentPage,numberRouteRequire);
+
+        // Kiểm tra nếu dữ liệu trả về là null
+        if (routePopularDTOS == null) {
+            Map<String, Object> emptyResponse = new HashMap<>();
+            emptyResponse.put("data", Collections.emptyList());
+            emptyResponse.put("totalElements", 0);
+            return ResponseEntity.ok(emptyResponse);
+        }
         // Chuyển đổi List<Object[]> thành List<RoutePopularDTO>
-        //Mục đích để lên trên frontend dữ liệu sẽ có dạng key-value (với key là tên các thuộc tính mô tả rõ ràng)
-        // Convert List<Object[]> to List<RoutePopularDTO>
         @SuppressWarnings("unchecked")
         List<Object[]> dataList = (List<Object[]>) routePopularDTOS.get("data");
         List<RoutePopularDTO> dtoList = dataList.stream()

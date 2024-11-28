@@ -1,10 +1,8 @@
 package com.example.demo.Service;
-
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.RouteRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -37,18 +35,6 @@ public class StatisticSV {
     }
 
 
-//    //Lấy  doanh thu theo X tuần gần nhất
-//    public List<Object[]> doanhThuTheoTuan(int numberTime) {
-//        // Lấy ngày giờ hiện tại
-//        LocalDateTime now = LocalDateTime.now();
-//        // Trừ đi 8 tuần từ ngày hiện tại
-//        LocalDateTime startDate = now.minus(8, ChronoUnit.WEEKS);
-//        return  bookingRepo.findWeeklyRevenuesSinceDate(startDate);
-//    }
-
-
-
-
     //Các hàm thông kê doanh thu theo tuyến xe
     //Lấy doanh thu theo X ngày gần nhất (doanh thu theo tuyến xe)
     public List<Object[]> doanhThuTheoNgayVaTuyenXe(int numberTime){
@@ -73,24 +59,25 @@ public class StatisticSV {
     }
 
     //Hàm thông kê số lượng vé bán của từng tuyến xe (mục đích xếp hạng tuyến xe phổ biến) theo thang
-    public List<Object[]> getMostPopularRouteXtoXAdmin(LocalDateTime startDate, LocalDateTime endDate) {
-        LocalDateTime now = LocalDateTime.now();
-        List<Object[]> allResults = routeRepo.findMostPopularRouteXtoX(startDate,endDate);
-        // Add a new field to allResults
+    public List<Object[]> getMostPopularRouteDate1toDate2Admin(LocalDateTime startDate, LocalDateTime endDate) {
         List<Object[]> modifiedResults = new ArrayList<>();
-        for (int i = 0; i < allResults.size(); i++) {
-            Object[] row = allResults.get(i);
-            // Create a new array with an extra field for the index
-            Object[] newRow = Arrays.copyOf(row, row.length + 1);
-            // Add the index value as the new field
-            newRow[row.length] = i+1; // The index of the current row in allResults
-            // Add to the modified list
-            modifiedResults.add(newRow);
-        }
-        // Xử lý kết quả trả về
-        return modifiedResults.isEmpty() ? null : modifiedResults;
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            List<Object[]> allResults = routeRepo.findMostPopularRouteDate1toDate2Admin(startDate, endDate);
+            for (int i = 0; i < allResults.size(); i++) {
+                Object[] row = allResults.get(i);
+                Object[] newRow = Arrays.copyOf(row, row.length + 1);
+                newRow[row.length] = i + 1; // The index of the current row in allResults
+                modifiedResults.add(newRow);
+            }
 
+        } catch (Exception e) {
+            System.err.println("An error occurred while processing the route data: " + e.getMessage());
+            return null;
+        }
+        return modifiedResults.isEmpty() ? null : modifiedResults;
     }
+
 
     //Lấy trình trạng vé
     public List<Object[]> tinhTrangVeSV() {

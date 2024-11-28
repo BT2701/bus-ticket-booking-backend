@@ -2,11 +2,13 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.BookingsToNotifyDTO;
 import com.example.demo.Model.Booking;
+import com.example.demo.Model.Customer;
 import com.example.demo.Model.Notification;
 import com.example.demo.Model.Schedule;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.NotificationRepo;
 import com.example.demo.Repository.ScheduleRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.Schedules;
@@ -24,14 +26,35 @@ public class NotificationSV {
     private ScheduleRepo scheduleRepo;
     @Autowired
     private BookingRepo bookingRepo;
+    @Autowired
+    private EmailService emailService;
     public List<Notification> findByCustomerId (int customerId){
-        return  notificationRepo.findByCustomerId(customerId);
+        LocalDateTime timeMinus30Minutes = LocalDateTime.now().minusMinutes(30);
+        return  notificationRepo.findUnreadOrRecentByCustomer(customerId,timeMinus30Minutes);
+    }
+
+
+    public void notiActionEditnDelSchedule(int scheduleId, String title, String message) {
+        List<Booking> bookings = bookingRepo.bookingsToNotiChangeSchedule(scheduleId);
+        for (Booking booking : bookings) {
+            createNotification(title, message, booking.getCustomer());
+            emailService.sendEmail(booking.getCustomer().getEmail(), title, message);
+        }
+    }
+
+    public boolean updateReadAt(int notificationId) {
+        Notification notification = notificationRepo.findById(notificationId).orElse(null);
+        if (notification != null) {
+            notification.setReadAt(Timestamp.valueOf(LocalDateTime.now()));
+            notificationRepo.save(notification);
+            return true; // Successfully updated
+        }
+        return false; // Notification not found
     }
 
     //Chạy mỗi phút
     @Scheduled(cron = "0 * * * * *")  // Mỗi phút
     public void checkAddNotiSchedule(){
-        System.out.println("running...");
         // Lấy thời gian hiện tại và cộng thêm 30 phút
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime futureTime = now.plusMinutes(30);
@@ -45,51 +68,29 @@ public class NotificationSV {
         List<BookingsToNotifyDTO> bookingsToNotifyDTOS = bookingRepo.listBookingToNotify(timestampStart,timestampEnd);
         for (BookingsToNotifyDTO bookingsToNotifyDTO : bookingsToNotifyDTOS) {
             String toAddress = bookingsToNotifyDTO.getBooking().getSchedule().getRoute().getTo().getAddress();
+            String addressToGetOnBus = bookingsToNotifyDTO.getBooking().getSchedule().getRoute().getTo().getName();
             if(bookingsToNotifyDTO.getIsPayment() == 0){
                 // Tạo thông báo cho mỗi vé
-                String message = "Tới quầy thanh toán để thanh toán vé đi " + toAddress;
-                // Lưu thông báo vào cơ sở dữ liệu
-                Timestamp currentDateFormatTimeStamp = Timestamp.valueOf(now);
-                Notification thongBao = new Notification();
-                thongBao.setMessage(message);
-                thongBao.setDate(currentDateFormatTimeStamp);
-                thongBao.setStatus(0);
-                thongBao.setCustomer(bookingsToNotifyDTO.getBooking().getCustomer());
-                notificationRepo.save(thongBao);
+                String message = "Vé xe đi: "+toAddress+" của bạn chưa được thanh toán, tới quầy thanh toán để thực hiện";
+                createNotification("Thông báo thanh toán vé xe",message,bookingsToNotifyDTO.getBooking().getCustomer());
             }
             // Tạo thông báo cho mỗi vé
-            String message = "Tuyến xe đi "+toAddress+ " khởi hành sau 30 phút nữa hãy đến điểm lên xe được in trên vé";
+            String message = "Xe đi : "+toAddress+ " sẽ khởi hành sau 30 phút nữa hãy đến "+addressToGetOnBus+" để lên xe";
             // Lưu thông báo vào cơ sở dữ liệu
-            Timestamp currentDateFormatTimeStamp = Timestamp.valueOf(now);
-            Notification thongBao = new Notification();
-            thongBao.setMessage(message);
-            thongBao.setDate(currentDateFormatTimeStamp);
-            thongBao.setStatus(0);
-            thongBao.setCustomer(bookingsToNotifyDTO.getBooking().getCustomer());
-            notificationRepo.save(thongBao);
+            createNotification("Thông báo tuyến xe sắp khởi hành",message,bookingsToNotifyDTO.getBooking().getCustomer());
         }
     }
 
-//    //Chạy mỗi phút
-//    @Scheduled(cron = "0 * * * * *")  // Mỗi phút
-//    public void checkDeleteNoti(){
-//        System.out.println("running...");
-//        LocalDateTime currentDate = LocalDateTime.now();
-//        LocalDateTime currentDatePlus30Minutes = currentDate.minusMinutes(30);
-//        List<Booking> bookings = scheduleRepo.lichTrinhChuaChay(currentDate, currentDatePlus30Minutes);
-//        for (Booking booking : bookings) {
-//            System.out.println("id lich trinh "+ booking.getSchedule().getId());
-//            // Tạo thông báo cho mỗi vé
-//            String message = "Chuyến xe của bạn sẽ khởi hành lúc " + booking.getSchedule().getDeparture().toLocalDateTime() + " Hãy đến "+booking.getSchedule().getRoute().getFrom().getName() +" để lên xe";
-//
-//            // Lưu thông báo vào cơ sở dữ liệu
-//            Timestamp currentDateFormatTimeStamp = Timestamp.valueOf(currentDate);
-//            Notification thongBao = new Notification();
-//            thongBao.setMessage(message);
-//            thongBao.setDate(currentDateFormatTimeStamp);
-//            thongBao.setStatus(0);
-//            thongBao.setCustomer(booking.getCustomer());
-//            notificationRepo.save(thongBao);
-//        }
-//    }
+
+    private Boolean createNotification(String title, String message, Customer customer){
+        LocalDateTime now = LocalDateTime.now();
+        Timestamp currentDateFormatTimeStamp = Timestamp.valueOf(now);
+        Notification thongBao = new Notification();
+        thongBao.setTitle(title);
+        thongBao.setMessage(message);
+        thongBao.setDate(currentDateFormatTimeStamp);
+        thongBao.setCustomer(customer);
+        Notification notification = notificationRepo.save(thongBao);
+        return notification != null;
+    }
 }

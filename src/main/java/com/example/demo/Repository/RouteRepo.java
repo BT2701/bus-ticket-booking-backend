@@ -79,7 +79,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "WHERE b.time >= :startDate AND b.status != 3" +
             "GROUP BY r.id " +
             "ORDER BY quantityTicket DESC")
-    Page<Object[]> findMostPopularRoute(Pageable pageable,@Param("startDate") LocalDateTime startDate);
+    Page<Object[]> findMostPopularRouteDate1toDate2Customer(Pageable pageable,@Param("startDate") LocalDateTime startDate);
 
 
     //Hàm lấy thông tin tuyến xe phổ biến trong khoảng ngày X1-X2
@@ -92,7 +92,7 @@ public interface RouteRepo extends JpaRepository<Route, Integer> {
             "WHERE b.time >= :startDate AND b.time <= :endDate AND b.status != 3" +
             "GROUP BY r.id " +
             "ORDER BY quantityTicket DESC")
-    List<Object[]> findMostPopularRouteXtoX(@Param("startDate") LocalDateTime startDate,
+    List<Object[]> findMostPopularRouteDate1toDate2Admin(@Param("startDate") LocalDateTime startDate,
                                             @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT r FROM routes r")

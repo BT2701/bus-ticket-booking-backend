@@ -189,9 +189,10 @@ CREATE TABLE IF NOT EXISTS `forgotpassword` (
 -- Dumping structure for table booking.notifications
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
   `message` varchar(255) DEFAULT NULL,
   `date_sent` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` int(11) DEFAULT 0,
+  `read_at` timestamp NULL DEFAULT NULL,
   `customer` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK61e5552050ot2nhk5rwt6g93k` (`customer`),

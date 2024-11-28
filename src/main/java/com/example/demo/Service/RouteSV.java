@@ -76,7 +76,7 @@ public class RouteSV {
 
             // Tạo Pageable cho truy vấn phân trang
             Pageable pageable = PageRequest.of(0, offset + limit, Sort.by(Sort.Order.desc("quantityTicket")));
-            Page<Object[]> pageResult = routeRepo.findMostPopularRoute(pageable, startDate);
+            Page<Object[]> pageResult = routeRepo.findMostPopularRouteDate1toDate2Customer(pageable, startDate);
             List<Object[]> allResults = pageResult.getContent();
             // Thêm field mới cho route (field này là chỉ định xếp hạng của route)
             List<Object[]> modifiedResults = new ArrayList<>();

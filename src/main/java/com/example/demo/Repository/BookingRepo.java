@@ -73,7 +73,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     List<Object[]> findMonthlyRevenuesByRouteWithStationsSinceDate(@Param("startDate") LocalDateTime startDate);
 
 
-    //Lấy những vé đã được thanh toán nhưng chưa sử dụng và những vé chưa thanh toán
+    //Lấy vé đã đặt: với điều kiện chưa thanh toán hoặc đã thanh toán rồi (để thống kê xem tình trạng vé)
     @Query("SELECT " +
             "SUM(CASE WHEN p.id IS NOT NULL AND b.status = 1 THEN 1 ELSE 0 END) AS DaThanhToanChuaSuDung, " +
             "SUM(CASE WHEN p.id IS NULL AND b.status = 1 THEN 1 ELSE 0 END) AS ChuaThanhToan " +
@@ -82,6 +82,8 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             "WHERE b.status = 1")
     List<Object[]> tinhTrangVe();
 
+    //Duyệt vé để lấy những customer cần được thông báo thanh toán và lịch trình chuẩn bị chạy
+    //Vì cả hai đều trước 30p lịch khởi hành mới thông báo nên gộp chung
     @Query("SELECT new com.example.demo.DTO.BookingsToNotifyDTO(b, " +
             "CASE " +
             "    WHEN COUNT(p) = COUNT(b) THEN 1 " +
@@ -100,4 +102,9 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
     @Query("select b.seatnum from bookings b where b.schedule.id=:scheduleId")
     public List<Object> getSeatBySchedule(@Param("scheduleId")int scheduleId);
+
+
+    //Lấy nhưng customer đã đặt lịch trình X để thông báo lịch trình bị thay đổi.
+    @Query("SELECT b FROM bookings b WHERE b.schedule.id = :scheduleId GROUP BY b.customer.id, b.schedule.id")
+    List<Booking> bookingsToNotiChangeSchedule(@Param("scheduleId") int scheduleId);
 }
