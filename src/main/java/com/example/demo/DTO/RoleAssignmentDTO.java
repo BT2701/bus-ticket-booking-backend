@@ -15,6 +15,6 @@ public class RoleAssignmentDTO {
     @NotNull(message = "Id của người dùng không được để trống !")
     private Integer customerId;
 
-    @NotNull(message = "Id của role không được để trống !")
-    private Long roleId;
+    @NotNull(message = "Tên của role không được để trống !")
+    private String roleName;
 }

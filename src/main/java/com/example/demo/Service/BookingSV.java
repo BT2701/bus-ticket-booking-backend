@@ -66,6 +66,41 @@ public class BookingSV {
             return false;
         }
     }
+    public boolean addVnpay(String email, String name, String phone, Schedule schedule, List<String> seats, String method, String provider, String transactionId) {
+        int transaction= Integer.parseInt(transactionId);
+        Customer c= addCustomerForBooking(email, name, phone);
+        Timestamp timestamp = Timestamp.from(Instant.now());
+        int status=1;
+        try {
+            for (String seat : seats) {
+                Booking booking = new Booking();
+                booking.setCustomer(c);
+                booking.setSchedule(schedule);
+                booking.setStatus(status);
+                booking.setTime(timestamp);
+                booking.setSeatnum(seat);
+                Booking saveBooking = bookingRepo.save(booking);
+                Payment payment = new Payment();
+                payment.setBooking(saveBooking);
+                payment.setMethod(method);
+                payment.setAmount(booking.getSchedule().getPrice());
+                payment.setTime(timestamp);
+                Payment savePayment = paymentRepo.save(payment);
+                Ewalletpay ewalletpay = new Ewalletpay();
+                ewalletpay.setPayment(savePayment);
+                ewalletpay.setProvider(provider);
+                ewalletpay.setTransactionid(transaction);
+                ewalletpay.setStatus(1);
+                ewalletpay.setTime(timestamp);
+                ewalletRepo.save(ewalletpay);
+            }
+            return true;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
     public List<BookingManagementDTO> getAllBookingManagement(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookingRepo.getBookingManagement(pageable);

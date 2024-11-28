@@ -89,8 +89,12 @@ public class JwtUtils {
     }
 
     public boolean isTokenExpired(String token) {
-        Date expirationDate = this.extractClaim(token, Claims::getExpiration);
-        return expirationDate.before(new Date());
+        try {
+            Date expirationDate = this.extractClaim(token, Claims::getExpiration);
+            return expirationDate.before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

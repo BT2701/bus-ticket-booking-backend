@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Model.Customer;
+import com.example.demo.Model.Token;
 import com.example.demo.Repository.CustomerRepo;
 import com.example.demo.Repository.TokenRepo;
 import com.example.demo.Utils.JwtUtils;
@@ -28,6 +29,7 @@ public class EmailService {
     private final TemplateEngine templateEngine;
     private final CustomerRepo customerRepo;
     private final ForgotpasswordSV forgotpasswordSV;
+    private final TokenSV tokenSV;
 
     @Value("${spring.mail.from}")
     private String emailFrom;
@@ -44,16 +46,19 @@ public class EmailService {
         return "Email sent successfully";
     }
     public String sendEmailToForgotPassword(String to) throws Exception {
+        Optional<Customer> customer = customerRepo.findCustomerByEmail(to);
+        if(customer.isEmpty()) {
+            throw new MessagingException("Không tìm thấy người dùng với email này!");
+        } else if(customer.get().getPassword() == null || customer.get().getPassword().isEmpty()) {
+            throw new MessagingException(String.format("Không thể quên mật khẩu vì đây là tài khoản đăng nhập từ %s !", customer.get().getProvider()));
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
         helper.setFrom(emailFrom);
         helper.setTo(to);
-        helper.setSubject("CONFIRM FORGOT PASSWORD");
+        helper.setSubject("QUÊN MẬT KHẨU");
 
-        Optional<Customer> customer = customerRepo.findCustomerByEmail(to);
-        if(customer.isEmpty()) {
-            throw new MessagingException("User with the email was not found!");
-        }
         String resetToken = forgotpasswordSV.createForgotPassword(customer.get());
 
         Context context = new Context();
@@ -66,6 +71,28 @@ public class EmailService {
         helper.setText(html, true);
 
         mailSender.send(message);
-        return "Email sent successfully";
+        return "Email đã được gửi thành công!";
+    }
+
+    public String sendEmailToVerify(Customer customer, String verifyToken) throws Exception {
+        Token jwtToken = tokenSV.addTokenToVerify(customer, verifyToken);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+        helper.setFrom(emailFrom);
+        helper.setTo(customer.getEmail());
+        helper.setSubject("XÁC THỰC TÀI KHOẢN");
+
+        Context context = new Context();
+        String linkConfirm = String.format("http://localhost:3000/login?verifyToken=%s", jwtToken.getAccessToken());
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("linkConfirm", linkConfirm);
+        context.setVariables(properties);
+
+        String html = templateEngine.process("verify-email.html", context);
+        helper.setText(html, true);
+
+        mailSender.send(message);
+        return "Tài khoản chưa xác thực ! Tin nhắn xác thực vừa được gửi tới email của bạn!";
     }
 }

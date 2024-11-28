@@ -65,16 +65,16 @@ public class RoleSV {
         roleRepository.delete(role);
     }
 
-    public void assignRoleToCustomer(Integer customerId, Long roleId) {
-        Optional<Role> role = roleRepository.findById(roleId);
-        if (role.isEmpty()) {
-            throw new RuntimeException("Role với id : " + roleId + " không tồn tại");
+    public void assignRoleToCustomer(Integer customerId, String roleName) {
+        Role role = roleRepository.findByName(roleName);
+        if (role == null) {
+            throw new RuntimeException("Role : " + roleName + " không tồn tại");
         }
 
         Customer existingCustomer = customerRepo.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với id: " + customerId));
 
-        existingCustomer.setRole(role.get());
+        existingCustomer.setRole(role);
         customerRepo.save(existingCustomer);
     }
 }

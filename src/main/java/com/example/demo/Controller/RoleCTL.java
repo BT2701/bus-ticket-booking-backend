@@ -102,11 +102,11 @@ public class RoleCTL {
             @RequestBody RoleAssignmentDTO roleAssignmentDTO
             ) {
         try {
-            roleService.assignRoleToCustomer(roleAssignmentDTO.getCustomerId(), roleAssignmentDTO.getRoleId());
+            roleService.assignRoleToCustomer(roleAssignmentDTO.getCustomerId(), roleAssignmentDTO.getRoleName());
             return ResponseEntity.ok(
                     ResponseDTO.builder()
                             .data(null)
-                            .message("Gán role " + roleAssignmentDTO.getRoleId() + " cho người dùng có id : " + roleAssignmentDTO.getCustomerId() + " thành công !")
+                            .message("Gán role " + roleAssignmentDTO.getRoleName() + " cho người dùng có id : " + roleAssignmentDTO.getCustomerId() + " thành công !")
                             .status(HttpStatus.OK.value())
                             .build()
             );
