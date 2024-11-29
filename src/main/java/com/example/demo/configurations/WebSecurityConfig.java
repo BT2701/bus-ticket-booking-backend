@@ -89,7 +89,10 @@ public class WebSecurityConfig {
                             .requestMatchers("PUT", String.format("%s/customers/lock/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
                             .requestMatchers("PUT", String.format("%s/customers/unlock/**", apiPrefix)).hasRole(Role.ROLE_ADMIN)
                             .requestMatchers("PUT", String.format("%s/customers/updateUserFromAdmin/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-
+                            .requestMatchers("GET", String.format("%s/route/station", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("POST", String.format("%s/route**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("PUT", String.format("%s/route**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
+                            .requestMatchers("DELETE", String.format("%s/route/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/customers**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/customers/details", apiPrefix)).hasAnyRole(Role.ROLE_CUSTOMER, Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("PUT", String.format("%s/customers/**", apiPrefix)).hasAnyRole(Role.ROLE_CUSTOMER, Role.ROLE_STAFF, Role.ROLE_ADMIN)

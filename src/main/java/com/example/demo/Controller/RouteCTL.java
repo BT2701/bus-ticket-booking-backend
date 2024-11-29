@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 import com.example.demo.DTO.RoutePopularDTO;
 import com.example.demo.Model.Schedule;
+import com.example.demo.Model.Station;
 import com.example.demo.Service.RouteSV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -69,5 +70,22 @@ public class RouteCTL {
     @GetMapping("api/route/total")
     public Integer getTotalRoute() {
         return routeSV.getTotalRoute();
+    }
+
+    @GetMapping("api/route/station")
+    public List<Station> getStation() {
+        return routeSV.getStations();
+    }
+    @PostMapping("api/route")
+    public Route addRoute(@RequestBody Route route) {
+        return routeSV.addRoute(route);
+    }
+    @PutMapping("api/route")
+    public Route updateRoute(@RequestBody Route route) {
+        return routeSV.updateRoute(route);
+    }
+    @DeleteMapping("api/route/{id}")
+    public void deleteRoute(@PathVariable int id) {
+        routeSV.deleteRoute(id);
     }
 }

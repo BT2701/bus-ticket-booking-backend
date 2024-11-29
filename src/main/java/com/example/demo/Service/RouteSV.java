@@ -1,7 +1,9 @@
 package com.example.demo.Service;
 
 import com.example.demo.Model.Route;
+import com.example.demo.Model.Station;
 import com.example.demo.Repository.RouteRepo;
+import com.example.demo.Repository.StationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,8 @@ import java.util.*;
 public class RouteSV {
     @Autowired
     private RouteRepo routeRepo;
+    @Autowired
+    private StationRepo stationRepo;
 
     // Phương thức để lấy danh sách các tuyến đường duy nhất
     public List<String> getUniqueFromLocations() {
@@ -113,6 +117,19 @@ public class RouteSV {
     }
     public Integer getTotalRoute() {
         return routeRepo.findAll().size();
+    }
+
+    public List<Station> getStations() {
+        return stationRepo.findAll();
+    }
+    public Route addRoute(Route route) {
+        return routeRepo.save(route);
+    }
+    public Route updateRoute(Route route) {
+        return routeRepo.save(route);
+    }
+    public void deleteRoute(int id) {
+        routeRepo.deleteById(id);
     }
 
 }
