@@ -52,9 +52,8 @@ public class ScheduleCTL {
     }
 
     @PostMapping("api/schedule")
-    public ResponseEntity<String> addSchedule(@Valid @RequestBody Schedule schedule) {
-        scheduleSV.addSchedule(schedule);
-        return ResponseEntity.ok("Schedule added");
+    public Schedule addSchedule(@Valid @RequestBody Schedule schedule) {
+        return scheduleSV.addSchedule(schedule);
     }
 
     @PutMapping("api/schedule")

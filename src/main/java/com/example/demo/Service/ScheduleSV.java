@@ -50,8 +50,12 @@ public class ScheduleSV {
     public Integer getTotalSchedule() {
         return scheduleRepo.findAll().size();
     }
-    public void addSchedule(Schedule schedule) {
-        scheduleRepo.save(schedule);
+    public Schedule addSchedule(Schedule schedule) {
+        List<Schedule> schedules = scheduleRepo.findByDepartureAndBus(schedule.getDeparture(), schedule.getBus().getId());
+        if (schedules.size() > 0) {
+            return null;
+        }
+        return scheduleRepo.save(schedule);
     }
     @Transactional
     public void updateSchedule(Schedule schedule) {

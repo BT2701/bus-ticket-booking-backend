@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface ScheduleRepo extends JpaRepository<Schedule, Integer> {
@@ -25,4 +26,7 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Integer> {
 
     @Query("select s from schedules s where s.departure >= CURRENT_TIMESTAMP")
     List<Schedule> getAvailableSchedules();
+
+    @Query("select s from schedules s where s.departure <= :departure and s.arrival >= :departure and s.bus.id = :bus")
+    List<Schedule> findByDepartureAndBus(@Param("departure") Timestamp departure, @Param("bus") int busId);
 }
