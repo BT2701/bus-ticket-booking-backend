@@ -82,7 +82,6 @@ public class WebSecurityConfig {
                             .requestMatchers("POST", String.format("%s/customers/refreshToken", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/oauth2-create-password", apiPrefix)).authenticated() //bug
                             .requestMatchers("PUT", String.format("%s/customers/updatePassword", apiPrefix)).authenticated()
-//                            .requestMatchers("POST", String.format("%s/customers/oauth2-logout", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/logoutAll", apiPrefix)).authenticated()
 
