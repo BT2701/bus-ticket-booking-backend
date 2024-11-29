@@ -73,11 +73,13 @@ public class NotificationSV {
                 // Tạo thông báo cho mỗi vé
                 String message = "Vé xe đi: "+toAddress+" của bạn chưa được thanh toán, tới quầy thanh toán để thực hiện";
                 createNotification("Thông báo thanh toán vé xe",message,bookingsToNotifyDTO.getBooking().getCustomer());
+                emailService.sendEmail(bookingsToNotifyDTO.getBooking().getCustomer().getEmail(), "Thông báo thanh toán vé xe", message);
             }
             // Tạo thông báo cho mỗi vé
             String message = "Xe đi : "+toAddress+ " sẽ khởi hành sau 30 phút nữa hãy đến "+addressToGetOnBus+" để lên xe";
             // Lưu thông báo vào cơ sở dữ liệu
             createNotification("Thông báo tuyến xe sắp khởi hành",message,bookingsToNotifyDTO.getBooking().getCustomer());
+            emailService.sendEmail(bookingsToNotifyDTO.getBooking().getCustomer().getEmail(), "Tuyến xe sắp khởi hành", message);
         }
     }
 
