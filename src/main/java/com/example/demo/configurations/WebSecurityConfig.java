@@ -80,9 +80,8 @@ public class WebSecurityConfig {
 
                             // customer
                             .requestMatchers("POST", String.format("%s/customers/refreshToken", apiPrefix)).authenticated()
-                            .requestMatchers("POST", String.format("%s/customers/oauth2-create-password", apiPrefix)).authenticated() //bug
+                            .requestMatchers("POST", String.format("%s/customers/oauth2-create-password", apiPrefix)).authenticated()
                             .requestMatchers("PUT", String.format("%s/customers/updatePassword", apiPrefix)).authenticated()
-//                            .requestMatchers("POST", String.format("%s/customers/oauth2-logout", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/logout", apiPrefix)).authenticated()
                             .requestMatchers("POST", String.format("%s/customers/logoutAll", apiPrefix)).authenticated()
 
