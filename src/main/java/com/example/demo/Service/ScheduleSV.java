@@ -8,12 +8,14 @@ import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.EwalletRepo;
 import com.example.demo.Repository.PaymentRepo;
 import com.example.demo.Repository.ScheduleRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-    
+import java.util.Optional;
+
 @Service
 public class ScheduleSV {
     @Autowired
@@ -24,6 +26,8 @@ public class ScheduleSV {
     private PaymentRepo paymentRepo;
     @Autowired
     private EwalletRepo ewalletRepo;
+    @Autowired
+    private NotificationSV notificationSV;
 
     public List<Schedule> getAllSchedules() {
         return scheduleRepo.getAvailableSchedules();
@@ -49,10 +53,25 @@ public class ScheduleSV {
     public void addSchedule(Schedule schedule) {
         scheduleRepo.save(schedule);
     }
+    @Transactional
     public void updateSchedule(Schedule schedule) {
+        Optional<Schedule> oldSchedule = scheduleRepo.findById(schedule.getId());
+        Schedule scheduleFound = oldSchedule.orElse(new Schedule());
         scheduleRepo.save(schedule);
+        String message = "Tuyến xe đi từ: "+scheduleFound.getRoute().getFrom().getAddress()+ " đến: "+
+                scheduleFound.getRoute().getTo().getAddress()+ " của bạn thay đổi thời gian xuất phát: "+
+                scheduleFound.getDeparture() + " sang: "+schedule.getDeparture();
+        if(scheduleFound.getDeparture() != schedule.getDeparture()){
+            notificationSV.notiActionEditnDelSchedule(schedule.getId(), "Thông báo thay đổi lịch trình",message);
+        }
     }
+    @Transactional
     public void deleteSchedule(int id) {
+        Optional<Schedule> oldSchedule = scheduleRepo.findById(id);
+        Schedule scheduleFound = oldSchedule.orElse(new Schedule());
+        String message = "Tuyến xe đi từ: "+scheduleFound.getRoute().getFrom().getAddress()+ " đến: "+
+                scheduleFound.getRoute().getTo().getAddress()+ " của bạn đã bị hủy ";
+        notificationSV.notiActionEditnDelSchedule(id, "Thông báo hủy lịch trình",message);
         List<Booking> b= bookingRepo.findBySchedule(id);
         if(b.size()>0){
             for (Booking booking : b) {

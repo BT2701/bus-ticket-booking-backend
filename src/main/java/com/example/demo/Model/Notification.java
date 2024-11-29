@@ -14,9 +14,11 @@ public class Notification {
     @Column(name = "date_sent")
     private Timestamp date;
     @Column
-    private String message;
+    private String title;
     @Column
-    private int status;
+    private String message;
+    @Column(name = "read_at")  // ánh xạ tới trường 'read_at' trong DB
+    private Timestamp readAt;
     @ManyToOne
     @JoinColumn(name = "customer")
     private Customer customer;
