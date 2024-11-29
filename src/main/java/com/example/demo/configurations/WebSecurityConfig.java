@@ -64,6 +64,7 @@ public class WebSecurityConfig {
                                     // bổ sung thêm các API còn lại
                                     String.format("%s/booking**", apiPrefix),
                                     String.format("%s/schedule**", apiPrefix),
+                                    String.format("%s/schedule/total", apiPrefix),
                                     String.format("%s/feedback/**", apiPrefix),
                                     String.format("%s/feedback/average/**", apiPrefix),
                                     String.format("%s/feedback/count/**", apiPrefix),
@@ -127,7 +128,6 @@ public class WebSecurityConfig {
 
                             .requestMatchers("GET", String.format("%s/booked-seats**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/user**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-                            .requestMatchers("GET", String.format("%s/schedules**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("POST", String.format("%s/booking**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("PUT", String.format("%s/booking/**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/booking/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
@@ -138,7 +138,6 @@ public class WebSecurityConfig {
                             .requestMatchers("GET", String.format("%s/route-management**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("POST", String.format("%s/schedule**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/route/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
-                            .requestMatchers("GET", String.format("%s/schedule/total**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
                             .requestMatchers("GET", String.format("%s/schedule-management**", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)
 
                             .requestMatchers("GET", String.format("%s/statistic/tinhtrangve", apiPrefix)).hasAnyRole(Role.ROLE_STAFF, Role.ROLE_ADMIN)

@@ -107,6 +107,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 // bổ sung thêm các API còn lại
                 Pair.of(String.format("%s/booking", apiPrefix), "POST"),
                 Pair.of(String.format("%s/schedule", apiPrefix), "GET"),
+                Pair.of(String.format("%s/schedule/total", apiPrefix), "GET"),
                 Pair.of(String.format("%s/feedback", apiPrefix), "GET"),
                 Pair.of(String.format("%s/feedback/average", apiPrefix), "GET"),
                 Pair.of(String.format("%s/feedback/count", apiPrefix), "GET"),
