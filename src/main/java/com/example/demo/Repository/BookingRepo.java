@@ -26,6 +26,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Lấy doanh thu X ngày gần nhất (doanh thu toàn bộ hệ thống)
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m-%d') AS bookingDate , SUM(b.schedule.bus.category.price * b.schedule.route.distance) AS dailyRevenues " +
             "FROM bookings b " +
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate AND b.status != 3 " +
             "GROUP BY DATE_FORMAT(b.time, '%Y-%m-%d') " +
             "ORDER BY bookingDate ASC")
@@ -34,6 +35,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Doanh thu trong khoảng ngày X1 - X2 (doanh thu toàn bộ hệ thống)
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m-%d') AS bookingDate, SUM(b.schedule.bus.category.price * b.schedule.route.distance) AS dailyRevenues " +
             "FROM bookings b " +
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate AND b.time <= :endDate AND b.status !=3" +
             "GROUP BY DATE_FORMAT(b.time, '%Y-%m-%d') " +
             "ORDER BY bookingDate ASC")
@@ -42,6 +44,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Doanh thu theo X tháng gần nhất (doanh thu toàn bộ hệ thống)
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m') AS month, SUM(b.schedule.bus.category.price * b.schedule.route.distance)" +
             "FROM bookings b " +
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate AND b.status !=3 " +
             "GROUP BY DATE_FORMAT(b.time, '%Y-%m') " +
             "ORDER BY month ASC")
@@ -50,6 +53,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Lấy doanh thu X ngày gần nhất (doanh thu theo tuyến xe)
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m-%d') bookingDate, CONCAT(b.schedule.route.from.name, '-', b.schedule.route.to.name), SUM(b.schedule.bus.category.price * b.schedule.route.distance) "+
             "FROM bookings b " +
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate AND b.status !=3 " +
             "GROUP BY b.schedule.route.id, DATE_FORMAT(b.time, '%Y-%m-%d') " +
             "ORDER BY bookingDate ASC ")
@@ -58,6 +62,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Doanh thu trong khoảng ngày X1 - X2 (doanh thu theo tuyến )
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m-%d') bookingDate, CONCAT(b.schedule.route.from.name, '-', b.schedule.route.to.name), SUM(b.schedule.bus.category.price * b.schedule.route.distance) "+
             "FROM bookings b "+
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate AND b.time <= :endDate AND b.status !=3 " +
             "GROUP BY b.schedule.route.id, DATE_FORMAT(b.time, '%Y-%m-%d') " +
             "ORDER BY bookingDate ASC ")
@@ -67,6 +72,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Lấy doanh thu X tháng gần nhất (doanh thu theo tuyến xe)
     @Query("SELECT DATE_FORMAT(b.time, '%Y-%m') AS month, CONCAT(b.schedule.route.from.name, '-', b.schedule.route.to.name), SUM(b.schedule.bus.category.price * b.schedule.route.distance) " +
             "FROM bookings b " +
+            "JOIN payments p ON b.id = p.booking.id "+
             "WHERE b.time >= :startDate  AND b.status !=3 " +
             "GROUP BY b.schedule.route.id, DATE_FORMAT(b.time, '%Y-%m') " +
             "ORDER BY month ASC ")

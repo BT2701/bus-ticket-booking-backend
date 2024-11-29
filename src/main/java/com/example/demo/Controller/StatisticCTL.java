@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,6 +103,7 @@ public class StatisticCTL {
     //Lấy tình trạng vé
     @GetMapping("/api/statistic/tinhtrangve")
     public List<Object[]> tinhTrangVe() {
-        return statisticSV.tinhTrangVeSV();
+        List<Object[]> result = statisticSV.tinhTrangVeSV();
+        return result != null ? result : new ArrayList<>();
     }
 }

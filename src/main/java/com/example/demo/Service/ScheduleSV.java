@@ -57,13 +57,13 @@ public class ScheduleSV {
     public void updateSchedule(Schedule schedule) {
         Optional<Schedule> oldSchedule = scheduleRepo.findById(schedule.getId());
         Schedule scheduleFound = oldSchedule.orElse(new Schedule());
+        scheduleRepo.save(schedule);
         String message = "Tuyến xe đi từ: "+scheduleFound.getRoute().getFrom().getAddress()+ " đến: "+
                 scheduleFound.getRoute().getTo().getAddress()+ " của bạn thay đổi thời gian xuất phát: "+
                 scheduleFound.getDeparture() + " sang: "+schedule.getDeparture();
         if(scheduleFound.getDeparture() != schedule.getDeparture()){
             notificationSV.notiActionEditnDelSchedule(schedule.getId(), "Thông báo thay đổi lịch trình",message);
         }
-        scheduleRepo.save(schedule);
     }
     @Transactional
     public void deleteSchedule(int id) {
