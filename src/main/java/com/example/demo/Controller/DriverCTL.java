@@ -61,7 +61,7 @@ public class DriverCTL {
 
             Driver newDriver = driverSV.addDriver(driver);
             return ResponseEntity.ok(newDriver);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return CustomersCTL.handleError(e);
         }
     }
@@ -74,17 +74,21 @@ public class DriverCTL {
             @RequestParam("phone") String phone,
             @RequestParam(value = "file", required = false) MultipartFile file)
     {
-        String imgPath = null;
-        if (file != null && !file.isEmpty()) {
-            try {
-                imgPath = fileSV.uploadFile(path, file);
-            } catch (IOException e) {
-                throw new RuntimeException("Bị lỗi khi upload file : " + e.getMessage());
+        try {
+            String imgPath = null;
+            if (file != null && !file.isEmpty()) {
+                try {
+                    imgPath = fileSV.uploadFile(path, file);
+                } catch (IOException e) {
+                    throw new RuntimeException("Bị lỗi khi upload file : " + e.getMessage());
+                }
             }
-        }
 
-        Driver updatedDriver = driverSV.updateDriver(id, name, license, phone, imgPath);
-        return ResponseEntity.ok(updatedDriver);
+            Driver updatedDriver = driverSV.updateDriver(id, name, license, phone, imgPath);
+            return ResponseEntity.ok(updatedDriver);
+        } catch (Exception e) {
+            return CustomersCTL.handleError(e);
+        }
     }
 
 

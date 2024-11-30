@@ -166,12 +166,21 @@ public class CustomersCTL {
             }
 
             Customer existCustomer = customerService.getCustomerByEmail(updateCustomerDTO.getEmail());
-
             if (existCustomer == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         ResponseDTO.builder()
                                 .status(HttpStatus.NOT_FOUND.value())
                                 .message("Không tìm thấy người dùng với email : " + email +" !")
+                                .build()
+                );
+            }
+
+            Customer checkPhoneCustomer = customerService.getCustomerByPhone(updateCustomerDTO.getPhone());
+            if (checkPhoneCustomer != null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        ResponseDTO.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .message("Số điện thoại đã tồn tại !")
                                 .build()
                 );
             }

@@ -55,6 +55,9 @@ public class CustomerService implements ICustomerService{
     public Customer getCustomerByEmail(String email) {
         return customerRepo.findCustomerByEmail(email).orElse(null);
     }
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepo.findCustomerByPhone(phone).orElse(null);
+    }
 
     @Override
     public Customer createCustomer(CustomerDTO customerDTO) throws Exception {

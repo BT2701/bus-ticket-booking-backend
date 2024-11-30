@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -28,11 +29,16 @@ public class DriverSV {
         return driverRepository.findById(id);
     }
 
-    public Driver addDriver(Driver driver) {
+    public Driver addDriver(Driver driver) throws Exception {
+        Driver existing = driverRepository.findByPhone(driver.getPhone());
+        if(existing != null) {
+            throw new Exception("Số điện thoại đã tồn tại");
+        }
+
         return driverRepository.save(driver);
     }
 
-    public Driver updateDriver(int id, String name, String license, String phone, String imgPath) {
+    public Driver updateDriver(int id, String name, String license, String phone, String imgPath) throws Exception {
         Optional<Driver> optionalDriver = driverRepository.findById(id);
         if (optionalDriver.isPresent()) {
             Driver driver = optionalDriver.get();
@@ -40,13 +46,18 @@ public class DriverSV {
             driver.setLicense(license);
             driver.setPhone(phone);
 
+            Driver existing = driverRepository.findByPhone(phone);
+            if(existing != null && existing.getId() != id) {
+                throw new Exception("Số điện thoại đã tồn tại");
+            }
+
             if (imgPath != null) {
                 driver.setImg(imgPath);
             }
 
             return driverRepository.save(driver);
         } else {
-            throw new RuntimeException("Không tìm thấy tài xế với id : " + id);
+            throw new Exception("Không tìm thấy tài xế với id : " + id);
         }
     }
 }
