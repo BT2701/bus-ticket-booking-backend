@@ -1,6 +1,6 @@
 # Bus-Ticket-Booking-Backend
 
-## Link to Back-end: [Click here](https://github.com/BT2701/bus-ticket-booking-frontend)
+## Link to Front-end: [Click here](https://github.com/BT2701/bus-ticket-booking-frontend)
 
 ## Introduction
 This is a web-based bus ticket booking system with three types of users: admin, customer, and staff. The customer category is further divided into logged-in and non-logged-in customers.
