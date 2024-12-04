@@ -18,31 +18,49 @@ public interface FeedbackRepo extends JpaRepository<Feedback, Integer> {
             "JOIN f.booking b " + // Join với bảng Booking thông qua feedback
             "JOIN b.customer c " + // Join với bảng Customer thông qua Booking để lấy tên khách hàng
             "JOIN b.schedule s " + // Join với bảng Schedule thông qua booking
-            "WHERE s.id = :scheduleId") // Điều kiện lấy feedback theo scheduleId
+            "JOIN s.route r " + // Kết nối đến Route
+            "JOIN b.schedule.bus "+
+            "JOIN s.bus bus " +
+            "WHERE r.id = (SELECT s2.route.id FROM schedules s2 WHERE s2.id = :scheduleId) " +
+            "AND bus.id = (SELECT s3.bus.id FROM schedules s3 WHERE s3.id = :scheduleId)")
     Page<Object[]> findFeedbackByScheduleId(@Param("scheduleId") int scheduleId, Pageable pageable);
 
     @Query("SELECT COUNT(f), AVG(f.rating) " +
             "FROM feedback f " +
             "JOIN f.booking b " +
             "JOIN b.schedule s " +
-            "WHERE s.id = :scheduleId")
+            "JOIN s.route r " + // Kết nối đến Route
+            "JOIN s.bus bus " +
+            "WHERE r.id = (SELECT s2.route.id FROM schedules s2 WHERE s2.id = :scheduleId) "+
+            "AND bus.id = (SELECT s3.bus.id FROM schedules s3 WHERE s3.id = :scheduleId)")
     List<Object[]> findFeedbackSummaryByScheduleId(@Param("scheduleId") int scheduleId);
 
     // Phương thức tìm phản hồi theo scheduleId và rating
     @Query("SELECT f.content, f.rating, f.date, c.name " +
-            "FROM feedback f " + // Lưu ý: Cần sử dụng tên lớp (Feedback) chứ không phải tên bảng (feedback)
-            "JOIN f.booking b " + // Join với bảng Booking thông qua feedback
-            "JOIN b.customer c " + // Join với bảng Customer thông qua Booking để lấy tên khách hàng
-            "JOIN b.schedule s " + // Join với bảng Schedule thông qua booking
-            "WHERE s.id = :scheduleId AND f.rating = :rating")
-    Page<Object[]> findFeedbackByScheduleIdAndRating(@Param("scheduleId") int scheduleId, @Param("rating") int rating, Pageable pageable);
+            "FROM feedback f " + // Tên class Feedback
+            "JOIN f.booking b " + // Join với Booking
+            "JOIN b.customer c " + // Join với Customer
+            "JOIN b.schedule s " + // Join với Schedule
+            "JOIN s.route r " + // Join với Route
+            "JOIN s.bus bus " + // Join với Bus
+            "WHERE r.id = (SELECT s2.route.id FROM schedules s2 WHERE s2.id = :scheduleId) " +
+            "AND f.rating = :rating " +
+            "AND bus.id = (SELECT s3.bus.id FROM schedules s3 WHERE s3.id = :scheduleId)")
+    Page<Object[]> findFeedbackByScheduleIdAndRating(@Param("scheduleId") int scheduleId,
+                                                     @Param("rating") int rating,
+                                                     Pageable pageable);
+
 
     // Phương thức đếm tổng số phản hồi theo scheduleId và rating
     @Query("SELECT COUNT(f) " +
             "FROM feedback f " + // Lưu ý: Sử dụng tên lớp (Feedback) chứ không phải tên bảng (feedback)
             "JOIN f.booking b " + // Join với bảng Booking thông qua feedback
             "JOIN b.schedule s " + // Join với bảng Schedule thông qua booking
-            "WHERE s.id = :scheduleId AND f.rating = :rating")
+            "JOIN s.route r " + // Kết nối đến Route
+            "JOIN s.bus bus " + // Join với Bus
+            "WHERE r.id = (SELECT s2.route.id FROM schedules s2 WHERE s2.id = :scheduleId) " +
+            "AND f.rating = :rating "+
+            "AND bus.id = (SELECT s3.bus.id FROM schedules s3 WHERE s3.id = :scheduleId)")
     long countFeedbackByScheduleIdAndRating(@Param("scheduleId") int scheduleId, @Param("rating") int rating);
 
 }
